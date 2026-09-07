@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D9E75">
+<title>Revora Bottle Save — Bank Sampah Botol Plastik</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Revora">
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f2f4f2;min-height:100vh;color:#111}
+
+/* ===== Auth pages (login/register) ===== */
+.auth-bg{display:none;min-height:100vh;background:linear-gradient(160deg,#0F6E56 0%,#1D9E75 45%,#3DBB95 100%);align-items:center;justify-content:center;padding:20px}
+.auth-bg.active{display:flex}
+.auth-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:32px 26px;box-shadow:0 20px 50px rgba(0,60,40,.25)}
+.logo{text-align:center;margin-bottom:28px}
+.logo-circle{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;box-shadow:0 8px 20px rgba(29,158,117,.35)}
+.logo h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo p{font-size:13px;color:#888;margin-top:3px}
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0 6px}
+.divider hr{flex:1;border:none;border-top:1px solid #eee}
+.divider span{font-size:12px;color:#aaa}
+
+/* ===== App pages ===== */
+.app-bg{display:none;min-height:100vh}
+.app-bg.active{display:block}
+.shell{max-width:440px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,.05)}
+.top{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;padding:16px 20px}
+.top.tall{padding:18px 20px 22px}
+.top-row{display:flex;justify-content:space-between;align-items:center}
+.top-back-row{display:flex;align-items:center;gap:12px}
+.back{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;width:34px;height:34px;border-radius:9px;flex-shrink:0}
+.top h1{font-size:17px;font-weight:800}
+.top.tall h1{font-size:18px}
+.top p{font-size:12px;opacity:.82;margin-top:2px}
+.logout-btn,.edit-btn{background:rgba(255,255,255,.18);border:none;color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600}
+.content{padding:20px;flex:1;overflow-y:auto}
+.nav{display:flex;background:#fff;border-top:1px solid #eee;padding:9px 0 11px;flex-shrink:0}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;padding:4px 0}
+.ni span{font-size:10px;color:#aaa;font-weight:600}
+.ni.a span,.ni.a em{color:#1D9E75}
+.ni em{font-size:21px;color:#ccc;font-style:normal}
+
+/* ===== Shared components ===== */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+.field input{width:100%;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 14px;font-size:15px;color:#111;background:#fafafa;outline:none;transition:.15s}
+.field input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 3px rgba(29,158,117,.12)}
+.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'Courier New',monospace;font-size:20px!important;font-weight:800!important}
+.btn{width:100%;height:46px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;box-shadow:0 6px 16px rgba(29,158,117,.3)}
+.btn-primary:disabled{opacity:.6;cursor:default}
+.btn-outline{background:#fff;border:1.5px solid #1D9E75;color:#1D9E75}
+.alert{border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:#fdecec;color:#c62828;border:1px solid #f6c8c8}
+.alert.show{display:block}
+.alert-ok{background:#e1f5ee;color:#0a6644;border-color:#b8e3d1}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card{background:#fff;border:1px solid #ececec;border-radius:14px;padding:16px}
+.slabel{font-size:11px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
+.empty{text-align:center;padding:32px 20px;color:#bbb;font-size:14px}
+.foot{text-align:center;margin-top:20px;font-size:11.5px;color:#bbb}
+
+/* ===== Register steps ===== */
+.rg-h1{text-align:center;font-size:21px;font-weight:800}
+.rg-sub{text-align:center;color:#888;font-size:13px;margin-top:4px;margin-bottom:20px}
+.steps{display:flex;gap:6px;margin-bottom:22px}
+.step{flex:1;height:4px;border-radius:4px;background:#eee;transition:background .3s}
+.step.done{background:#1D9E75}
+.row{display:flex;gap:10px;margin-top:18px}
+.row .btn-primary{flex:1}
+.row .btn-outline{width:52px;flex-shrink:0}
+.ok-block{text-align:center;display:none}
+.ok-block.show{display:block}
+.ok-block .ic{font-size:52px;margin-bottom:10px}
+.ok-block h3{font-size:19px;font-weight:800;color:#0F6E56}
+.ok-block p{font-size:13px;color:#666;margin-top:6px}
+.uid-box{font-size:20px;font-weight:800;color:#1D9E75;border:2px dashed #1D9E75;border-radius:12px;padding:14px;margin:14px 0;letter-spacing:1px;background:#f0faf6;font-family:'Courier New',monospace}
+.link{text-align:center;margin-top:18px;font-size:13px;color:#666}
+.link a{color:#1D9E75;text-decoration:none;font-weight:700;cursor:pointer}
+
+/* ===== Home ===== */
+.hero{background:rgba(255,255,255,.15);border-radius:14px;padding:15px 16px;margin-top:16px;display:flex;align-items:center;gap:13px}
+.ava{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
+.hero-name{font-size:15.5px;font-weight:700;color:#fff}
+.hero-email{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:2px;word-break:break-all}
+.pills{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.22);border-radius:20px;padding:4px 11px;font-size:12px;color:#fff;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:22px}
+.mcard{background:#fff;border:1px solid #ececec;border-radius:14px;padding:14px 10px;text-decoration:none;color:#222;display:flex;flex-direction:column;align-items:center;gap:8px;transition:.15s;cursor:pointer;text-align:center}
+.mcard:active{transform:scale(.97);background:#f7f9f7}
+.micon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ia{background:#faeeda}.ib{background:#e6f1fb}.ic{background:#faece7}
+.mname{font-size:13px;font-weight:700}
+.acard{border:1px solid #ececec;border-radius:14px;overflow:hidden}
+.arow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid #f4f4f4}
+.arow:last-child{border-bottom:none}
+.aico{width:34px;height:34px;border-radius:9px;background:#e1f5ee;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.aico.r{background:#faeeda}
+.aico.u{background:#f0f0f0}
+.atitle{font-size:13px;font-weight:600}
+.adate{font-size:11px;color:#aaa;margin-top:1px}
+.apoin{font-size:13px;font-weight:800;color:#1D9E75;flex-shrink:0}
+.apoin.m{color:#BA7517}
+
+/* ===== Riwayat ===== */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
+.sbox{background:#fff;border:1px solid #ececec;border-radius:12px;padding:13px;text-align:center}
+.sbox .val{font-size:22px;font-weight:800;color:#1D9E75}
+.sbox .lbl{font-size:11px;color:#888;margin-top:3px;font-weight:600}
+.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.fb{padding:7px 15px;border-radius:20px;border:1.5px solid #e5e5e5;background:none;font-size:13px;cursor:pointer;color:#666;font-weight:600}
+.fb.a{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.mgroup{margin-bottom:16px}
+.mlabel{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+
+/* ===== Voucher QR modal ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:99}
+.overlay.open{display:flex}
+.sheet{background:#fff;width:100%;max-width:440px;margin:0 auto;border-radius:18px 18px 0 0;padding:22px}
+.handle{width:40px;height:4px;background:#eee;border-radius:4px;margin:0 auto 16px}
+
+/* ===== Profil ===== */
+.ava-block{text-align:center;margin-bottom:20px}
+.ava-lg{width:72px;height:72px;border-radius:50%;background:#e1f5ee;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:27px;font-weight:800;color:#1D9E75;border:3px solid #1D9E75}
+.ava-name{font-size:19px;font-weight:800}
+.ava-email{font-size:13px;color:#888;margin-top:2px;word-break:break-all}
+.ava-since{font-size:12px;color:#aaa;margin-top:2px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:20px}
+.irow{display:flex;align-items:center;gap:11px;padding:14px 0;border-bottom:1px solid #f5f5f5}
+.irow:last-child{border-bottom:none}
+.iico{font-size:17px;color:#aaa;width:20px;flex-shrink:0}
+.ikey{font-size:12px;color:#aaa;font-weight:600}
+.ival{font-size:14px;font-weight:600;margin-top:1px;word-break:break-all}
+.action-list{display:flex;flex-direction:column;gap:9px}
+.alink{display:flex;align-items:center;gap:12px;padding:14px 15px;background:#fff;border:1px solid #ececec;border-radius:12px;cursor:pointer;font-size:14px;color:#222;text-decoration:none;font-weight:600}
+.alink:active{background:#f7f9f7}
+.alink.red{color:#c62828;border-color:#fadada}
+.alink .arr{margin-left:auto;color:#ccc;font-size:18px}
+.alink.red .arr{color:#f0aaaa}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- PAGE: LOGIN -->
+<!-- ============================================================ -->
+<div class="auth-bg active" id="page-login">
+  <div class="auth-card">
+    <div class="logo">
+      <div class="logo-circle">🌿</div>
+      <h1>Revora</h1>
+      <p>Bank Sampah Botol Plastik</p>
+    </div>
+    <div id="lg-err" class="alert"></div>
+    <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="email@contoh.com" autocomplete="username"></div>
+    <div class="field"><label>PIN (6 digit)</label><input id="lg-pin" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
+    <button class="btn btn-primary" id="lg-btn" onclick="doLogin()">Masuk</button>
+    <div class="divider"><hr><span>atau</span><hr></div>
+    <button class="btn btn-outline" onclick="showPage('register')">Daftar Akun Baru</button>
+    <p class="foot">Revora Bottle Save v6.0</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: REGISTER -->
+<!-- ============================================================ -->
+<div class="auth-bg" id="page-register">
+  <div class="auth-card">
+    <h1 class="rg-h1">Daftar Akun Baru</h1>
+    <p class="rg-sub">Revora — Bank Sampah</p>
+    <div class="steps"><div class="step done" id="rg-s1"></div><div class="step" id="rg-s2"></div><div class="step" id="rg-s3"></div></div>
+    <div id="rg-err" class="alert"></div>
+
+    <div id="rg-step1">
+      <div class="field"><label>Nama Lengkap *</label><input id="rg-nama" type="text" placeholder="Nama lengkap"></div>
+      <div class="field"><label>Email *</label><input id="rg-email" type="email" placeholder="email@contoh.com"></div>
+      <div class="field"><label>No. HP *</label><input id="rg-hp" type="tel" placeholder="08xxxxxxxxxx"></div>
+      <button class="btn btn-primary" onclick="rgGoStep2()">Lanjut →</button>
+      <div class="link">Sudah punya akun? <a onclick="showPage('login')">Masuk</a></div>
+    </div>
+
+    <div id="rg-step2" style="display:none">
+      <div class="field"><label>Alamat</label><input id="rg-alamat" type="text" placeholder="Jl. Merdeka No.1"></div>
+      <div class="field"><label>PIN (6 digit) *</label><input id="rg-pin" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"></div>
+      <div class="field"><label>Konfirmasi PIN *</label><input id="rg-pin2" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric"></div>
+      <div class="row">
+        <button class="btn btn-outline" onclick="rgBackStep1()">←</button>
+        <button class="btn btn-primary" id="rg-btn" onclick="doRegister()">Daftar Sekarang</button>
+      </div>
+    </div>
+
+    <div id="rg-step3" class="ok-block">
+      <div class="ic">✅</div>
+      <h3>Registrasi Berhasil!</h3>
+      <p>Login berikutnya cukup pakai email &amp; PIN yang tadi kamu daftarkan</p>
+      <div class="uid-box" id="rg-hasil-uid">—</div>
+      <p style="font-size:12px;color:#999">(User ID kamu — untuk referensi identitas)</p>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="showPage('login')">Lanjut ke Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: HOME -->
+<!-- ============================================================ -->
+<div class="app-bg" id="page-home">
+  <div class="shell">
+    <div class="top tall">
+      <div class="top-row">
+        <div><h1>🌿 Revora</h1><p>Bank Sampah Botol Plastik</p></div>
+        <button class="logout-btn" onclick="doLogout()">Keluar</button>
+      </div>
+      <div class="hero">
+        <div class="ava" id="hm-ava">?</div>
+        <div style="min-width:0">
+          <div class="hero-name" id="hm-nama">—</div>
+          <div class="hero-email" id="hm-email">—</div>
+          <div class="pills">
+            <span class="pill">🪙 <span id="hm-poin">0</span> poin</span>
+            <span class="pill">🍶 <span id="hm-botol">0</span> botol</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <p class="slabel">Menu</p>
+      <div class="grid">
+        <div class="mcard" onclick="showPage('redeem')">
+          <div class="micon ia">🎟️</div><div class="mname">Voucher</div>
+        </div>
+        <div class="mcard" onclick="showPage('riwayat')">
+          <div class="micon ib">📋</div><div class="mname">Riwayat</div>
+        </div>
+        <div class="mcard" onclick="showPage('profil')">
+          <div class="micon ic">👤</div><div class="mname">Profil</div>
+        </div>
+      </div>
+      <p class="slabel">Aktivitas Terakhir</p>
+      <div class="acard"><div id="hm-act-list"><div class="empty">Memuat...</div></div></div>
+    </div>
+    <nav class="nav">
+      <button class="ni a" onclick="showPage('home')"><em>🏠</em><span>Beranda</span></button>
+      <button class="ni" onclick="showPage('redeem')"><em>🎟️</em><span>Voucher</span></button>
+      <button class="ni" onclick="showPage('riwayat')"><em>📋</em><span>Riwayat</span></button>
+      <button class="ni" onclick="showPage('profil')"><em>👤</em><span>Profil</span></button>
+    </nav>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: REDEEM / VOUCHER -->
+<!-- ============================================================ -->
+<div class="app-bg" id="page-redeem">
+  <div class="shell">
+    <div class="top">
+      <div class="top-back-row">
+        <button class="back" onclick="showPage('home')">←</button>
+        <div><h1>Voucher</h1><p>Tukar poinmu jadi voucher belanja</p></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="card" style="background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;border:none;padding:18px;margin-bottom:18px;box-shadow:0 6px 16px rgba(29,158,117,.25)">
+        <div style="font-size:12px;opacity:.85">Poin kamu</div>
+        <div style="font-size:28px;font-weight:800;margin-top:4px" id="rd-poin">—</div>
+        <div style="font-size:12px;opacity:.75;margin-top:2px" id="rd-botol">— botol</div>
+      </div>
+
+      <div class="alert" id="rd-err"></div>
+
+      <p class="slabel">Tukar Poin</p>
+      <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#faeeda,#f5dfb8);border:1px solid #e5c99f">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="font-size:44px">🎟️</div>
+          <div style="flex:1">
+            <div style="font-size:19px;font-weight:800;color:#8f5a11">Voucher Rp 10.000</div>
+            <div style="font-size:13px;color:#665;margin-top:2px">Berlaku di merchant Revora</div>
+            <div style="margin-top:8px;font-size:13px;color:#444;font-weight:600">🪙 100 poin per voucher</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="rd-btn-redeem" onclick="rdDoRedeem()" style="margin-top:14px;background:linear-gradient(135deg,#BA7517,#8f5a11);box-shadow:0 6px 16px rgba(186,117,23,.3)">
+          ✨ Tukar Sekarang
+        </button>
+      </div>
+
+      <p class="slabel">Voucher Saya</p>
+      <div id="rd-my-list"><div class="empty">Memuat voucher...</div></div>
+    </div>
+    <nav class="nav">
+      <button class="ni" onclick="showPage('home')"><em>🏠</em><span>Beranda</span></button>
+      <button class="ni a" onclick="showPage('redeem')"><em>🎟️</em><span>Voucher</span></button>
+      <button class="ni" onclick="showPage('riwayat')"><em>📋</em><span>Riwayat</span></button>
+      <button class="ni" onclick="showPage('profil')"><em>👤</em><span>Profil</span></button>
+    </nav>
+  </div>
+</div>
+
+<div class="overlay" id="rd-qr-overlay" onclick="rdCloseQR(event)">
+  <div class="sheet" style="border-radius:18px;max-width:400px">
+    <div class="handle"></div>
+    <h3 style="font-size:17px;font-weight:800;text-align:center">🎟️ Voucher Rp 10.000</h3>
+    <p style="font-size:13px;color:#666;text-align:center;margin-top:2px">Tunjukkan QR ini ke kasir merchant</p>
+    <div style="background:#fff;border:1.5px solid #eee;border-radius:12px;padding:14px;margin:14px 0;display:flex;justify-content:center;align-items:center;min-height:220px">
+      <div id="rd-qr-canvas"></div>
+    </div>
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Kode Voucher</div>
+      <div id="rd-qr-kode" style="font-size:22px;font-weight:800;color:#1D9E75;letter-spacing:2px;margin-top:4px;font-family:'Courier New',monospace">—</div>
+    </div>
+    <div id="rd-qr-status" style="text-align:center;padding:8px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px">—</div>
+    <button class="btn btn-outline" onclick="rdCloseQR()">Tutup</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: RIWAYAT -->
+<!-- ============================================================ -->
+<div class="app-bg" id="page-riwayat">
+  <div class="shell">
+    <div class="top">
+      <div class="top-back-row">
+        <button class="back" onclick="showPage('home')">←</button>
+        <div><h1>Riwayat Aktivitas</h1></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="stats">
+        <div class="sbox"><div class="val" id="rw-botol">—</div><div class="lbl">🍶 Total Botol</div></div>
+        <div class="sbox"><div class="val" id="rw-poin">—</div><div class="lbl">🪙 Total Poin</div></div>
+      </div>
+      <div class="filters">
+        <button class="fb a" onclick="rwSetFilter('all',this)">Semua</button>
+        <button class="fb" onclick="rwSetFilter('INPUT',this)">Input Botol</button>
+        <button class="fb" onclick="rwSetFilter('REDEEM',this)">Redeem</button>
+        <button class="fb" onclick="rwSetFilter('USED',this)">Voucher Dipakai</button>
+      </div>
+      <div id="rw-list"><div class="empty">Memuat riwayat...</div></div>
+    </div>
+    <nav class="nav">
+      <button class="ni" onclick="showPage('home')"><em>🏠</em><span>Beranda</span></button>
+      <button class="ni" onclick="showPage('redeem')"><em>🎟️</em><span>Voucher</span></button>
+      <button class="ni a" onclick="showPage('riwayat')"><em>📋</em><span>Riwayat</span></button>
+      <button class="ni" onclick="showPage('profil')"><em>👤</em><span>Profil</span></button>
+    </nav>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: PROFIL -->
+<!-- ============================================================ -->
+<div class="app-bg" id="page-profil">
+  <div class="shell">
+    <div class="top">
+      <div class="top-row">
+        <div class="top-back-row"><button class="back" onclick="showPage('home')">←</button><h1>Profil Saya</h1></div>
+        <button class="edit-btn" id="pf-btn-edit" onclick="pfToggleEdit()">✏️ Edit</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="alert alert-ok" id="pf-ok"></div>
+      <div class="alert" id="pf-err"></div>
+      <div class="ava-block">
+        <div class="ava-lg" id="pf-ava">?</div>
+        <div class="ava-name"  id="pf-nama">—</div>
+        <div class="ava-email" id="pf-email-top">—</div>
+        <div class="ava-since" id="pf-since">—</div>
+      </div>
+      <div class="sgrid">
+        <div class="sbox"><div class="val" id="pf-poin">—</div><div class="lbl">🪙 Poin</div></div>
+        <div class="sbox"><div class="val" id="pf-botol">—</div><div class="lbl">🍶 Botol</div></div>
+        <div class="sbox"><div class="val" id="pf-kg">—</div><div class="lbl">📦 Est. Kg</div></div>
+      </div>
+      <div class="card" id="pf-view-card" style="padding:0 15px;margin-bottom:16px">
+        <div class="irow"><div class="iico">🆔</div><div><div class="ikey">User ID</div><div class="ival" id="pf-uid">—</div></div></div>
+        <div class="irow"><div class="iico">📱</div><div><div class="ikey">No. HP</div><div class="ival" id="pf-hp">—</div></div></div>
+        <div class="irow"><div class="iico">📍</div><div><div class="ikey">Alamat</div><div class="ival" id="pf-alamat">—</div></div></div>
+      </div>
+      <div class="card" id="pf-edit-card" style="display:none;margin-bottom:16px">
+        <div class="field" style="margin-top:0"><label>Nama Lengkap</label><input id="pf-e-nama" type="text"></div>
+        <div class="field"><label>No. HP</label><input id="pf-e-hp" type="tel"></div>
+        <div class="field"><label>Alamat</label><input id="pf-e-alamat" type="text"></div>
+        <div class="row" style="margin-top:6px">
+          <button class="btn btn-outline" onclick="pfToggleEdit()">Batal</button>
+          <button class="btn btn-primary" id="pf-btn-save" onclick="pfSave()">💾 Simpan</button>
+        </div>
+      </div>
+
+      <p class="slabel">Kartu RFID Bank Sampah</p>
+      <div class="card" style="margin-bottom:16px">
+        <p style="font-size:12.5px;color:#888;line-height:1.5;margin-bottom:12px">
+          Tautkan kartu RFID supaya kamu tinggal tap kartu di alat, tanpa perlu buka aplikasi.
+          Minta petugas membacakan UID kartu dari alat, lalu masukkan di bawah ini.
+        </p>
+        <div class="field" style="margin-top:0"><label>UID Kartu</label><input id="pf-card-uid" type="text" placeholder="Contoh: A1B2C3D4" style="text-transform:uppercase"></div>
+        <button class="btn btn-primary" id="pf-btn-card" onclick="pfRegisterCard()">💳 Tautkan Kartu</button>
+      </div>
+
+      <p class="slabel">Lainnya</p>
+      <div class="action-list">
+        <div class="alink" onclick="showPage('riwayat')">📋 Riwayat Transaksi<span class="arr">›</span></div>
+        <button class="alink red" onclick="doLogout()">🚪 Keluar<span class="arr">›</span></button>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="ni" onclick="showPage('home')"><em>🏠</em><span>Beranda</span></button>
+      <button class="ni" onclick="showPage('redeem')"><em>🎟️</em><span>Voucher</span></button>
+      <button class="ni" onclick="showPage('riwayat')"><em>📋</em><span>Riwayat</span></button>
+      <button class="ni a" onclick="showPage('profil')"><em>👤</em><span>Profil</span></button>
+    </nav>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCRIPTS -->
+<!-- ============================================================ -->
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script>
+/* ============================================================
+   STATE & CORE
+============================================================ */
+var user = null;
+try { user = JSON.parse(sessionStorage.getItem('revora_user') || 'null'); } catch(e) {}
+
+var rwAll = [];
+var rwFilter = 'all';
+
+function showPage(name) {
+  document.querySelectorAll('.auth-bg, .app-bg').forEach(function(p){ p.classList.remove('active'); });
+  if (name === 'login' || name === 'register') {
+    document.getElementById('page-' + name).classList.add('active');
+  } else {
+    if (!user) { showPage('login'); return; }
+    document.getElementById('page-' + name).classList.add('active');
+  }
+  if (name === 'home')    { hmRender(); hmLoadActivity(); hmRefreshProfile(); }
+  if (name === 'redeem')  { rdRender(); rdLoadMyVouchers(); }
+  if (name === 'riwayat') { rwRender(); rwLoad(); }
+  if (name === 'profil')  { pfFill(user); }
+}
+
+function doLogout() {
+  if (confirm('Yakin ingin keluar?')) {
+    sessionStorage.removeItem('revora_user');
+    user = null;
+    showPage('login');
+  }
+}
+
+function fmtDate(d) {
+  if (!d) return '-';
+  var dt = new Date(d);
+  return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
+    + ' ' + dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+function showAlert(id, msg, ok) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'alert show' + (ok ? ' alert-ok' : '');
+  setTimeout(function(){ el.className = 'alert'; }, 4000);
+}
+function setBusy(btnId, on) {
+  var btn = document.getElementById(btnId);
+  if (on) { btn.dataset.orig = btn.innerHTML; btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true; }
+  else    { btn.innerHTML = btn.dataset.orig; btn.disabled = false; }
+}
+
+/* ============================================================
+   LOGIN & REGISTER (email + PIN 6 digit)
+============================================================ */
+async function doLogin() {
+  var email = document.getElementById('lg-email').value.trim();
+  var pin   = document.getElementById('lg-pin').value.trim();
+  if (!email || !pin) return showAlert('lg-err', 'Email dan PIN wajib diisi');
+  if (!/^\d{6}$/.test(pin)) return showAlert('lg-err', 'PIN harus 6 digit angka');
+
+  setBusy('lg-btn', true);
+  var res = await API.loginUser({ email: email, pin: pin });
+  setBusy('lg-btn', false);
+  if (!res || !res.ok) return showAlert('lg-err', (res && res.msg) || 'Login gagal');
+
+  user = res.profile;
+  sessionStorage.setItem('revora_user', JSON.stringify(user));
+  document.getElementById('lg-email').value = '';
+  document.getElementById('lg-pin').value = '';
+  showPage('home');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('page-login').classList.contains('active')) doLogin();
+});
+
+function rgGoStep2() {
+  var nama  = document.getElementById('rg-nama').value.trim();
+  var email = document.getElementById('rg-email').value.trim();
+  var hp    = document.getElementById('rg-hp').value.trim();
+  if (!nama)  return showAlert('rg-err', 'Nama wajib diisi');
+  if (!email) return showAlert('rg-err', 'Email wajib diisi');
+  if (!/^\S+@\S+\.\S+$/.test(email)) return showAlert('rg-err', 'Format email tidak valid');
+  if (!hp)    return showAlert('rg-err', 'No. HP wajib diisi');
+  document.getElementById('rg-step1').style.display = 'none';
+  document.getElementById('rg-step2').style.display = 'block';
+  document.getElementById('rg-s2').className = 'step done';
+}
+function rgBackStep1() {
+  document.getElementById('rg-step2').style.display = 'none';
+  document.getElementById('rg-step1').style.display = 'block';
+  document.getElementById('rg-s2').className = 'step';
+}
+async function doRegister() {
+  var nama   = document.getElementById('rg-nama').value.trim();
+  var email  = document.getElementById('rg-email').value.trim();
+  var hp     = document.getElementById('rg-hp').value.trim();
+  var alamat = document.getElementById('rg-alamat').value.trim();
+  var pin    = document.getElementById('rg-pin').value.trim();
+  var pin2   = document.getElementById('rg-pin2').value.trim();
+
+  if (!/^\d{6}$/.test(pin)) return showAlert('rg-err', 'PIN harus 6 digit angka');
+  if (pin !== pin2)         return showAlert('rg-err', 'Konfirmasi PIN tidak cocok');
+
+  setBusy('rg-btn', true);
+  var res = await API.registerUser({ nama: nama, email: email, hp: hp, alamat: alamat, pin: pin });
+  setBusy('rg-btn', false);
+  if (!res || !res.ok) return showAlert('rg-err', (res && res.msg) || 'Registrasi gagal');
+
+  document.getElementById('rg-step2').style.display = 'none';
+  document.getElementById('rg-hasil-uid').textContent = res.user_id;
+  document.getElementById('rg-step3').className = 'ok-block show';
+  document.getElementById('rg-s3').className = 'step done';
+}
+
+/* ============================================================
+   HOME
+============================================================ */
+function hmRender() {
+  if (!user) return;
+  var inisial = (user.nama||'?').split(' ').map(function(w){return w[0]}).join('').substr(0,2).toUpperCase();
+  document.getElementById('hm-ava').textContent   = inisial;
+  document.getElementById('hm-nama').textContent  = user.nama;
+  document.getElementById('hm-email').textContent = user.email;
+  document.getElementById('hm-poin').textContent  = (user.total_poin||0).toLocaleString('id-ID');
+  document.getElementById('hm-botol').textContent = (user.total_botol||0).toLocaleString('id-ID');
+}
+async function hmLoadActivity() {
+  var res = await API.getHistory({ email: user.email, limit: 5 });
+  var el = document.getElementById('hm-act-list');
+  if (!res || !res.ok || !res.history.length) { el.innerHTML = '<div class="empty">Belum ada aktivitas</div>'; return; }
+  el.innerHTML = res.history.slice(0, 5).map(function(h) {
+    var ico = '🍶', ac = '', cls = '', prefix = '+';
+    if (h.tipe === 'INPUT')       { ico = '🍶'; }
+    else if (h.tipe === 'REDEEM') { ico = '🎟️'; ac = 'r'; cls = 'm'; prefix = ''; }
+    else if (h.tipe === 'USED')   { ico = '🏪'; ac = 'u'; cls = ''; prefix = ''; }
+    var poinTxt = h.poin === 0 ? '' : prefix + h.poin + ' poin';
+    return '<div class="arow"><div class="aico '+ac+'">'+ico+'</div>'
+      + '<div style="flex:1"><div class="atitle">'+h.keterangan+'</div><div class="adate">'+fmtDate(h.timestamp)+'</div></div>'
+      + '<div class="apoin '+cls+'">'+poinTxt+'</div></div>';
+  }).join('');
+}
+async function hmRefreshProfile() {
+  var res = await API.getProfile({ email: user.email });
+  if (res && res.ok) {
+    user = res.profile;
+    sessionStorage.setItem('revora_user', JSON.stringify(user));
+    hmRender();
+  }
+}
+
+/* ============================================================
+   REDEEM & VOUCHER SAYA
+============================================================ */
+function rdRender() {
+  if (!user) return;
+  document.getElementById('rd-poin').textContent  = (user.total_poin||0).toLocaleString('id-ID');
+  document.getElementById('rd-botol').textContent = (user.total_botol||0).toLocaleString('id-ID') + ' botol';
+}
+async function rdLoadMyVouchers() {
+  var res = await API.getMyVouchers({ email: user.email });
+  var area = document.getElementById('rd-my-list');
+  if (!res || !res.ok || !res.vouchers.length) {
+    area.innerHTML = '<div class="empty">Belum ada voucher. Tukar poinmu sekarang!</div>';
+    return;
+  }
+  area.innerHTML = res.vouchers.map(function(v) {
+    var isActive = v.status === 'aktif';
+    var badge = isActive
+      ? '<span style="background:#e1f5ee;color:#0F6E56;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ AKTIF</span>'
+      : '<span style="background:#f0f0f0;color:#888;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✖ HANGUS</span>';
+    var subInfo = isActive ? 'Terbit ' + fmtDate(v.tgl_terbit)
+                           : 'Dipakai ' + fmtDate(v.tgl_dipakai) + ' — ' + (v.merchant || '-');
+    return '<div class="card" onclick="rdShowQR(\''+v.kode+'\',\''+v.status+'\')" style="cursor:pointer;margin-bottom:9px;' + (isActive ? '' : 'opacity:.65') + '">'
+      + '<div style="display:flex;align-items:center;gap:12px">'
+      +   '<div style="font-size:32px">🎟️</div>'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'
+      +       '<div style="font-size:15px;font-weight:800;color:#1D9E75">Rp ' + Number(v.nilai_rupiah).toLocaleString('id-ID') + '</div>'
+      +       badge
+      +     '</div>'
+      +     '<div style="font-size:12px;color:#888;font-family:\'Courier New\',monospace">' + v.kode + '</div>'
+      +     '<div style="font-size:11px;color:#aaa;margin-top:2px">' + subInfo + '</div>'
+      +   '</div>'
+      +   '<div style="color:#ccc;font-size:20px">›</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function rdDoRedeem() {
+  if (!user) return;
+  if (user.total_poin < 100) return showAlert('rd-err', 'Poin tidak cukup. Perlu 100 poin.');
+  if (!confirm('Tukar 100 poin dengan Voucher Rp 10.000?')) return;
+
+  setBusy('rd-btn-redeem', true);
+  var res = await API.redeemVoucher({ email: user.email });
+  setBusy('rd-btn-redeem', false);
+  if (!res || !res.ok) return showAlert('rd-err', (res && res.msg) || 'Gagal redeem');
+
+  user.total_poin = res.sisa_poin;
+  sessionStorage.setItem('revora_user', JSON.stringify(user));
+  document.getElementById('rd-poin').textContent = res.sisa_poin.toLocaleString('id-ID');
+  rdLoadMyVouchers();
+  rdShowQR(res.kode_voucher, 'aktif');
+}
+
+function rdShowQR(kode, status) {
+  document.getElementById('rd-qr-kode').textContent = kode;
+  var canvas = document.getElementById('rd-qr-canvas');
+  canvas.innerHTML = '';
+  new QRCode(canvas, { text: kode, width: 200, height: 200,
+    colorDark: '#0F6E56', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+
+  var statusEl = document.getElementById('rd-qr-status');
+  if (status === 'aktif') {
+    statusEl.style.background = '#e1f5ee';
+    statusEl.style.color = '#0F6E56';
+    statusEl.textContent = '✅ Voucher aktif — bisa dipakai di merchant';
+  } else {
+    statusEl.style.background = '#fdecec';
+    statusEl.style.color = '#c62828';
+    statusEl.textContent = '✖ Voucher sudah dipakai';
+  }
+  document.getElementById('rd-qr-overlay').className = 'overlay open';
+}
+function rdCloseQR(e) {
+  if (!e || e.target === document.getElementById('rd-qr-overlay'))
+    document.getElementById('rd-qr-overlay').className = 'overlay';
+}
+
+/* ============================================================
+   RIWAYAT
+============================================================ */
+function rwRender() {
+  if (!user) return;
+  document.getElementById('rw-botol').textContent = (user.total_botol||0).toLocaleString('id-ID');
+  document.getElementById('rw-poin').textContent  = (user.total_poin||0).toLocaleString('id-ID');
+}
+function rwSetFilter(f, el) {
+  rwFilter = f;
+  document.querySelectorAll('.fb').forEach(function(b){ b.className = 'fb'; });
+  el.className = 'fb a';
+  rwRenderList();
+}
+function rwRenderList() {
+  var data = rwFilter === 'all' ? rwAll : rwAll.filter(function(h){ return h.tipe === rwFilter; });
+  var el = document.getElementById('rw-list');
+  if (!data.length) { el.innerHTML = '<div class="empty">Belum ada riwayat</div>'; return; }
+  var groups = {};
+  data.forEach(function(h) {
+    var k = new Date(h.timestamp).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(h);
+  });
+  el.innerHTML = Object.keys(groups).map(function(m) {
+    return '<div class="mgroup"><div class="mlabel">'+m+'</div><div class="acard">'
+      + groups[m].map(function(h) {
+          var ico = '🍶', ac = '', cls = '', prefix = '+';
+          if (h.tipe === 'INPUT')       { ico = '🍶'; }
+          else if (h.tipe === 'REDEEM') { ico = '🎟️'; ac = 'r'; cls = 'm'; prefix = ''; }
+          else if (h.tipe === 'USED')   { ico = '🏪'; ac = 'u'; cls = ''; prefix = ''; }
+          var poinTxt = h.poin === 0 ? '' : prefix + h.poin + ' poin';
+          return '<div class="arow"><div class="aico '+ac+'">'+ico+'</div>'
+            + '<div style="flex:1;min-width:0"><div class="atitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+h.keterangan+'</div>'
+            + '<div class="adate">'+fmtDate(h.timestamp)+'</div></div>'
+            + '<div class="apoin '+cls+'">'+poinTxt+'</div></div>';
+        }).join('')
+      + '</div></div>';
+  }).join('');
+}
+async function rwLoad() {
+  var res = await API.getHistory({ email: user.email, limit: 200 });
+  if (res && res.ok) { rwAll = res.history; rwRenderList(); }
+  else { document.getElementById('rw-list').innerHTML = '<div class="empty">Gagal memuat riwayat</div>'; }
+}
+
+/* ============================================================
+   PROFIL
+============================================================ */
+function pfFill(u) {
+  if (!u) return;
+  var ini = (u.nama||'?').split(' ').map(function(w){return w[0]}).join('').substr(0,2).toUpperCase();
+  document.getElementById('pf-ava').textContent      = ini;
+  document.getElementById('pf-nama').textContent     = u.nama||'—';
+  document.getElementById('pf-email-top').textContent = u.email||'—';
+  document.getElementById('pf-since').textContent    = 'Bergabung '+(u.tgl_daftar ? new Date(u.tgl_daftar).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '-');
+  document.getElementById('pf-poin').textContent     = (u.total_poin||0).toLocaleString('id-ID');
+  document.getElementById('pf-botol').textContent    = (u.total_botol||0).toLocaleString('id-ID');
+  document.getElementById('pf-kg').textContent       = ((u.total_botol||0)*0.025).toFixed(1);
+  document.getElementById('pf-uid').textContent      = u.user_id||'-';
+  document.getElementById('pf-hp').textContent       = u.hp||'-';
+  document.getElementById('pf-alamat').textContent   = u.alamat||'-';
+  document.getElementById('pf-e-nama').value    = u.nama||'';
+  document.getElementById('pf-e-hp').value      = u.hp||'';
+  document.getElementById('pf-e-alamat').value  = u.alamat||'';
+}
+function pfToggleEdit() {
+  var v = document.getElementById('pf-view-card');
+  var e = document.getElementById('pf-edit-card');
+  var b = document.getElementById('pf-btn-edit');
+  if (e.style.display === 'none') { e.style.display = ''; v.style.display = 'none'; b.textContent = '✖ Batal'; }
+  else { e.style.display = 'none'; v.style.display = ''; b.textContent = '✏️ Edit'; }
+}
+async function pfSave() {
+  var nama   = document.getElementById('pf-e-nama').value.trim();
+  var hp     = document.getElementById('pf-e-hp').value.trim();
+  var alamat = document.getElementById('pf-e-alamat').value.trim();
+  if (!nama) return showAlert('pf-err', 'Nama tidak boleh kosong');
+
+  setBusy('pf-btn-save', true);
+  var res = await API.updateProfile({ email: user.email, nama: nama, hp: hp, alamat: alamat });
+  setBusy('pf-btn-save', false);
+  if (!res || !res.ok) return showAlert('pf-err', (res && res.msg) || 'Gagal menyimpan profil');
+
+  user = res.profile;
+  sessionStorage.setItem('revora_user', JSON.stringify(user));
+  pfFill(user);
+  pfToggleEdit();
+  showAlert('pf-ok', '✅ Profil berhasil diperbarui', true);
+}
+async function pfRegisterCard() {
+  var uid = document.getElementById('pf-card-uid').value.trim().toUpperCase();
+  if (!uid) return showAlert('pf-err', 'Masukkan UID kartu terlebih dahulu');
+
+  setBusy('pf-btn-card', true);
+  var res = await API.registerCard({ email: user.email, card_uid: uid });
+  setBusy('pf-btn-card', false);
+  if (!res || !res.ok) return showAlert('pf-err', (res && res.msg) || 'Gagal menautkan kartu');
+
+  document.getElementById('pf-card-uid').value = '';
+  showAlert('pf-ok', '✅ ' + res.msg, true);
+}
+
+/* ============================================================
+   SERVICE WORKER — daftarkan supaya PWA installable
+============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.warn('SW register failed:', err);
+    });
+  });
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+if (user) showPage('home'); else showPage('login');
+</script>
+</body>
+</html>

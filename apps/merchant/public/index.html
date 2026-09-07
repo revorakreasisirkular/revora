@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#BA7517">
+<title>Revora Merchant — Scan Voucher</title>
+
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Revora Merchant">
+
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f2f4f2;min-height:100vh;color:#111}
+
+.auth-bg{display:none;min-height:100vh;background:linear-gradient(160deg,#8f5a11 0%,#BA7517 45%,#DA9330 100%);align-items:center;justify-content:center;padding:20px}
+.auth-bg.active{display:flex}
+.auth-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:32px 26px;box-shadow:0 20px 50px rgba(80,50,0,.25)}
+.logo{text-align:center;margin-bottom:28px}
+.logo-circle{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#BA7517,#8f5a11);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;box-shadow:0 8px 20px rgba(186,117,23,.35)}
+.logo h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo p{font-size:13px;color:#888;margin-top:3px}
+
+.app-bg{display:none;min-height:100vh}
+.app-bg.active{display:block}
+.shell{max-width:520px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,.05)}
+.top{background:linear-gradient(135deg,#BA7517,#8f5a11);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:17px;font-weight:800}
+.top p{font-size:12px;opacity:.82;margin-top:2px;word-break:break-all}
+.logout-btn{background:rgba(255,255,255,.18);border:none;color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0}
+
+.content{padding:20px;flex:1;overflow-y:auto}
+.slabel{font-size:11px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+.field input{width:100%;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 14px;font-size:15px;background:#fafafa;outline:none;transition:.15s}
+.field input:focus{border-color:#BA7517;background:#fff;box-shadow:0 0 0 3px rgba(186,117,23,.12)}
+.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'Courier New',monospace;font-size:20px!important;font-weight:800!important}
+
+.btn{width:100%;height:48px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn-primary{background:linear-gradient(135deg,#BA7517,#8f5a11);color:#fff;box-shadow:0 6px 16px rgba(186,117,23,.3)}
+.btn-outline{background:#fff;border:1.5px solid #BA7517;color:#BA7517}
+.btn-success{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;box-shadow:0 6px 16px rgba(29,158,117,.3)}
+
+.alert{border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:#fdecec;color:#c62828;border:1px solid #f6c8c8}
+.alert.show{display:block}
+.alert-ok{background:#e1f5ee;color:#0a6644;border-color:#b8e3d1}
+.alert-info{background:#eaf2fb;color:#1a4d80;border-color:#c8dcf3}
+
+.card{background:#fff;border:1px solid #ececec;border-radius:14px;padding:16px}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.scanner-placeholder{background:linear-gradient(160deg,#faeeda,#f5dfb8);border:2px dashed #BA7517;border-radius:14px;padding:36px 20px;margin-bottom:14px;text-align:center}
+.scanner-placeholder .big-ico{font-size:56px;margin-bottom:8px}
+.scanner-placeholder h4{font-size:15px;font-weight:800;color:#8f5a11;margin-bottom:4px}
+.scanner-placeholder p{font-size:12.5px;color:#775;margin-bottom:14px;line-height:1.5}
+
+#scanner-container{display:none;background:#000;border-radius:14px;overflow:hidden;margin-bottom:14px;position:relative;aspect-ratio:1/1;max-height:420px}
+#scanner-container.active{display:block}
+#scanner-container video, #scanner-container canvas{width:100%!important;height:100%!important;object-fit:cover}
+#reader{width:100%}
+.scanner-controls{display:none;margin-bottom:14px}
+.scanner-controls.active{display:block}
+
+.manual-input{display:flex;gap:8px;margin-bottom:12px}
+.manual-input input{flex:1;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 12px;font-size:14px;background:#fafafa;outline:none;font-family:'Courier New',monospace;text-transform:uppercase}
+.manual-input input:focus{border-color:#BA7517;background:#fff}
+.manual-input button{padding:0 18px;height:44px;background:#BA7517;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+
+.vcr-detail{background:linear-gradient(135deg,#faeeda,#f5dfb8);border:1px solid #e5c99f;border-radius:14px;padding:20px;margin-bottom:14px}
+.vcr-detail .amt{font-size:32px;font-weight:800;color:#8f5a11;text-align:center;margin-bottom:6px}
+.vcr-detail .kode{text-align:center;font-family:'Courier New',monospace;font-size:16px;color:#665;letter-spacing:2px;margin-bottom:14px}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-row .key{color:#665;font-weight:600}
+.detail-row .val{color:#333;font-weight:700;text-align:right;word-break:break-all;max-width:60%}
+.status-active{color:#0F6E56!important}
+.status-used{color:#c62828!important}
+
+.result-hasil{border-radius:14px;padding:24px;text-align:center;margin-bottom:14px}
+.result-hasil.ok{background:linear-gradient(160deg,#e1f5ee,#c9ebd9);border:2px solid #1D9E75}
+.result-hasil.err{background:#fdecec;border:2px solid #c62828}
+.result-hasil .big{font-size:52px;margin-bottom:10px}
+.result-hasil h3{font-size:18px;font-weight:800}
+.result-hasil.ok h3{color:#0F6E56}
+.result-hasil.err h3{color:#c62828}
+.result-hasil p{font-size:13px;color:#666;margin-top:6px}
+
+.recent-list{display:flex;flex-direction:column;gap:8px}
+.recent-item{background:#fff;border:1px solid #ececec;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.recent-item .ic{font-size:22px}
+.recent-item .info{flex:1;min-width:0}
+.recent-item .k{font-size:13px;font-weight:700;font-family:'Courier New',monospace}
+.recent-item .t{font-size:11px;color:#aaa;margin-top:1px}
+.recent-item .a{font-size:13px;font-weight:800;color:#BA7517}
+.empty{text-align:center;padding:24px;color:#bbb;font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="auth-bg active" id="page-login">
+  <div class="auth-card">
+    <div class="logo">
+      <div class="logo-circle">🏪</div>
+      <h1>Revora Merchant</h1>
+      <p>Scan &amp; konfirmasi voucher belanja</p>
+    </div>
+    <div id="lg-err" class="alert"></div>
+    <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="merchant@contoh.com" autocomplete="username"></div>
+    <div class="field"><label>PIN (6 digit)</label><input id="lg-pin" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
+    <button class="btn btn-primary" id="lg-btn" onclick="doLogin()">Masuk</button>
+    <p style="text-align:center;margin-top:16px;font-size:11.5px;color:#bbb">Revora Merchant Portal v6.0</p>
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div class="app-bg" id="page-scanner">
+  <div class="shell">
+    <div class="top">
+      <div style="min-width:0">
+        <h1>🏪 <span id="sc-nama">—</span></h1>
+        <p id="sc-email">—</p>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Keluar</button>
+    </div>
+
+    <div class="content">
+      <div id="sc-err" class="alert"></div>
+      <div id="sc-ok" class="alert alert-ok"></div>
+      <div id="sc-info" class="alert alert-info"></div>
+
+      <p class="slabel">Scan QR Voucher</p>
+
+      <div class="scanner-placeholder" id="sc-placeholder">
+        <div class="big-ico">📷</div>
+        <h4>Kamera belum aktif</h4>
+        <p>Klik tombol di bawah untuk membuka kamera dan mulai scan QR voucher pelanggan.</p>
+        <button class="btn btn-primary" id="sc-btn-open" onclick="sc_startScanner()">📷 Buka Kamera</button>
+      </div>
+
+      <div id="scanner-container"><div id="reader"></div></div>
+      <div class="scanner-controls" id="sc-controls">
+        <button class="btn btn-outline" onclick="sc_stopScanner()">✖ Tutup Kamera</button>
+      </div>
+
+      <p class="slabel">Atau masukkan kode manual</p>
+      <div class="manual-input">
+        <input type="text" id="sc-manual-kode" placeholder="ECO-XXXXXXXX" maxlength="12">
+        <button onclick="sc_manualCheck()">Cek</button>
+      </div>
+
+      <p class="slabel" style="margin-top:18px">Voucher Baru Dipakai</p>
+      <div id="sc-recent"><div class="empty">Belum ada voucher dipakai di sesi ini</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KONFIRMASI -->
+<div class="app-bg" id="page-confirm">
+  <div class="shell">
+    <div class="top">
+      <div><h1>Konfirmasi Voucher</h1><p>Periksa detail sebelum menyetujui</p></div>
+      <button class="logout-btn" onclick="showPage('scanner')">✖ Batal</button>
+    </div>
+    <div class="content">
+      <div id="cf-err" class="alert"></div>
+      <div class="vcr-detail" id="cf-vcr-detail">
+        <div class="amt" id="cf-amt">Rp 10.000</div>
+        <div class="kode" id="cf-kode">ECO-XXXXXXXX</div>
+        <div class="detail-row"><span class="key">Status</span><span class="val" id="cf-status">—</span></div>
+        <div class="detail-row"><span class="key">Email Pemilik</span><span class="val" id="cf-user-email">—</span></div>
+        <div class="detail-row"><span class="key">Terbit</span><span class="val" id="cf-tgl">—</span></div>
+        <div class="detail-row" id="cf-dipakai-row" style="display:none"><span class="key">Dipakai</span><span class="val" id="cf-dipakai">—</span></div>
+        <div class="detail-row" id="cf-merchant-row" style="display:none"><span class="key">Oleh</span><span class="val" id="cf-merchant">—</span></div>
+      </div>
+      <button class="btn btn-success" id="cf-btn-yes" onclick="cf_doConfirm()">✅ Konfirmasi Pemakaian</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="showPage('scanner')">Batalkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- HASIL -->
+<div class="app-bg" id="page-result">
+  <div class="shell">
+    <div class="top"><div><h1>Hasil</h1></div></div>
+    <div class="content">
+      <div class="result-hasil" id="rs-block">
+        <div class="big" id="rs-icon">✅</div>
+        <h3 id="rs-title">—</h3>
+        <p id="rs-msg">—</p>
+        <div style="margin-top:14px;font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:#333;background:rgba(255,255,255,.6);border-radius:8px;padding:8px" id="rs-kode-box">—</div>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('scanner')">📷 Scan Voucher Berikutnya</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/config.js"></script>
+<script src="/js/api.js"></script>
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+var merchant = null;
+try { merchant = JSON.parse(sessionStorage.getItem('revora_merchant') || 'null'); } catch(e) {}
+
+var currentVoucher = null;
+var recentUsed     = [];
+var scanner        = null;
+var scannerRunning = false;
+
+/* ============================================================
+   CORE
+============================================================ */
+function showPage(name) {
+  document.querySelectorAll('.auth-bg, .app-bg').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+
+  // Kamera SELALU dimatikan saat keluar dari halaman scanner
+  if (name !== 'scanner' && scannerRunning) sc_stopScanner();
+
+  if (name === 'scanner' && merchant) {
+    document.getElementById('sc-nama').textContent  = merchant.nama;
+    document.getElementById('sc-email').textContent = merchant.email;
+    renderRecent();
+    // Kamera tidak auto-start — user klik tombol
+  }
+}
+
+function showAlert(id, msg, kind) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  var base = 'alert';
+  if (kind === 'ok')   base = 'alert alert-ok';
+  if (kind === 'info') base = 'alert alert-info';
+  el.className = base + ' show';
+  setTimeout(function(){ el.className = base; }, 4500);
+}
+
+function setBusy(btnId, on) {
+  var btn = document.getElementById(btnId);
+  if (on) { btn.dataset.orig = btn.innerHTML; btn.innerHTML = '<div class="spinner"></div>'; btn.disabled = true; }
+  else    { btn.innerHTML = btn.dataset.orig; btn.disabled = false; }
+}
+
+function fmtDate(d) {
+  if (!d) return '-';
+  var dt = new Date(d);
+  return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
+    + ' ' + dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ============================================================
+   LOGIN
+============================================================ */
+async function doLogin() {
+  var email = document.getElementById('lg-email').value.trim().toLowerCase();
+  var pin   = document.getElementById('lg-pin').value.trim();
+  if (!email || !pin) return showAlert('lg-err', 'Email dan PIN harus diisi');
+  if (!/^\d{6}$/.test(pin)) return showAlert('lg-err', 'PIN harus 6 digit angka');
+
+  setBusy('lg-btn', true);
+  var res = await API.loginMerchant({ email: email, pin: pin });
+  setBusy('lg-btn', false);
+  if (!res || !res.ok) return showAlert('lg-err', (res && res.msg) || 'Login gagal');
+
+  merchant = res.merchant;
+  sessionStorage.setItem('revora_merchant', JSON.stringify(merchant));
+  document.getElementById('lg-email').value = '';
+  document.getElementById('lg-pin').value = '';
+  showPage('scanner');
+}
+
+function doLogout() {
+  if (!confirm('Yakin keluar dari akun merchant?')) return;
+  sc_stopScanner();
+  sessionStorage.removeItem('revora_merchant');
+  merchant = null;
+  showPage('login');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('page-login').classList.contains('active')) doLogin();
+});
+
+/* ============================================================
+   SCANNER — kamera HANYA aktif setelah user klik
+============================================================ */
+function sc_startScanner() {
+  if (scannerRunning) return;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return showAlert('sc-err', 'Browser tidak mendukung akses kamera. Coba Chrome/Safari terbaru.');
+  }
+
+  document.getElementById('sc-placeholder').style.display = 'none';
+  document.getElementById('scanner-container').classList.add('active');
+  document.getElementById('sc-controls').classList.add('active');
+
+  try {
+    scanner = new Html5Qrcode('reader');
+  } catch (e) {
+    _sc_resetPlaceholder();
+    return showAlert('sc-err', 'Scanner tidak tersedia: ' + e.message);
+  }
+
+  var config = {
+    fps: 10,
+    qrbox: function(w, h) { var m = Math.min(w, h); return { width: Math.floor(m * 0.7), height: Math.floor(m * 0.7) }; },
+  };
+
+  scanner.start(
+    { facingMode: 'environment' },
+    config,
+    function(decodedText) {
+      var kode = decodedText.trim().toUpperCase();
+      sc_stopScanner();
+      sc_checkVoucher(kode);
+    },
+    function() { /* abaikan error frame */ }
+  ).then(function() {
+    scannerRunning = true;
+    showAlert('sc-info', '📷 Arahkan kamera ke QR voucher pelanggan', 'info');
+  }).catch(function(err) {
+    _sc_resetPlaceholder();
+    var msg = String(err && err.message ? err.message : err);
+    if (/Permission|NotAllowed|denied/i.test(msg)) {
+      showAlert('sc-err', '❌ Izin kamera DITOLAK. Buka pengaturan browser → izinkan kamera untuk situs ini, lalu klik "Buka Kamera" lagi.');
+    } else if (/NotFound|NoDevice/i.test(msg)) {
+      showAlert('sc-err', '❌ Kamera tidak ditemukan di device ini.');
+    } else if (/NotReadable|InUse/i.test(msg)) {
+      showAlert('sc-err', '❌ Kamera sedang dipakai aplikasi lain. Tutup aplikasi lain lalu coba lagi.');
+    } else if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      showAlert('sc-err', '❌ Kamera hanya bisa aktif di HTTPS.');
+    } else {
+      showAlert('sc-err', '❌ Gagal buka kamera: ' + msg);
+    }
+  });
+}
+
+function sc_stopScanner() {
+  if (!scanner || !scannerRunning) { _sc_resetPlaceholder(); return; }
+  scanner.stop().then(function() {
+    try { scanner.clear(); } catch(e) {}
+    scanner = null; scannerRunning = false; _sc_resetPlaceholder();
+  }).catch(function() {
+    scanner = null; scannerRunning = false; _sc_resetPlaceholder();
+  });
+}
+
+function _sc_resetPlaceholder() {
+  document.getElementById('sc-placeholder').style.display = '';
+  document.getElementById('scanner-container').classList.remove('active');
+  document.getElementById('sc-controls').classList.remove('active');
+}
+
+function sc_manualCheck() {
+  var kode = document.getElementById('sc-manual-kode').value.trim().toUpperCase();
+  if (!kode) return showAlert('sc-err', 'Masukkan kode voucher terlebih dahulu');
+  if (scannerRunning) sc_stopScanner();
+  sc_checkVoucher(kode);
+  document.getElementById('sc-manual-kode').value = '';
+}
+
+async function sc_checkVoucher(kode) {
+  var res = await API.scanVoucher({ merchant_email: merchant.email, kode_voucher: kode });
+  if (!res || !res.ok) return showAlert('sc-err', (res && res.msg) || 'Voucher tidak dikenal');
+  currentVoucher = res.voucher;
+  cf_render(currentVoucher);
+  showPage('confirm');
+}
+
+function renderRecent() {
+  var el = document.getElementById('sc-recent');
+  if (!recentUsed.length) { el.innerHTML = '<div class="empty">Belum ada voucher dipakai di sesi ini</div>'; return; }
+  el.innerHTML = '<div class="recent-list">' + recentUsed.map(function(r) {
+    return '<div class="recent-item">'
+      + '<div class="ic">✅</div>'
+      + '<div class="info"><div class="k">' + r.kode + '</div><div class="t">' + fmtDate(r.tgl) + '</div></div>'
+      + '<div class="a">Rp ' + Number(r.nilai).toLocaleString('id-ID') + '</div>'
+      + '</div>';
+  }).join('') + '</div>';
+}
+
+/* ============================================================
+   CONFIRM
+============================================================ */
+function cf_render(v) {
+  document.getElementById('cf-amt').textContent  = 'Rp ' + Number(v.nilai_rupiah).toLocaleString('id-ID');
+  document.getElementById('cf-kode').textContent = v.kode;
+  document.getElementById('cf-user-email').textContent = v.user_email || '-';
+  document.getElementById('cf-tgl').textContent  = fmtDate(v.tgl_terbit);
+
+  var statusEl = document.getElementById('cf-status');
+  var btnYes   = document.getElementById('cf-btn-yes');
+
+  if (v.status === 'aktif') {
+    statusEl.textContent = '✅ AKTIF';
+    statusEl.className = 'val status-active';
+    btnYes.style.display = '';
+    document.getElementById('cf-dipakai-row').style.display  = 'none';
+    document.getElementById('cf-merchant-row').style.display = 'none';
+  } else {
+    statusEl.textContent = '✖ SUDAH DIPAKAI';
+    statusEl.className = 'val status-used';
+    btnYes.style.display = 'none';
+    document.getElementById('cf-dipakai-row').style.display  = 'flex';
+    document.getElementById('cf-merchant-row').style.display = 'flex';
+    document.getElementById('cf-dipakai').textContent  = fmtDate(v.tgl_dipakai);
+    document.getElementById('cf-merchant').textContent = v.merchant_pemakai || '-';
+  }
+}
+
+async function cf_doConfirm() {
+  if (!currentVoucher) return;
+  if (currentVoucher.status !== 'aktif') return showAlert('cf-err', 'Voucher tidak aktif');
+  if (!confirm('Konfirmasi voucher ' + currentVoucher.kode
+      + ' senilai Rp ' + Number(currentVoucher.nilai_rupiah).toLocaleString('id-ID') + '?\n\n'
+      + 'Setelah dikonfirmasi, voucher HANGUS dan tidak bisa dipakai lagi.')) return;
+
+  setBusy('cf-btn-yes', true);
+  var res = await API.confirmVoucherUsage({ merchant_email: merchant.email, kode_voucher: currentVoucher.kode });
+  setBusy('cf-btn-yes', false);
+
+  if (!res || !res.ok) {
+    rs_show(false, 'Gagal Konfirmasi', (res && res.msg) || 'Terjadi kesalahan', currentVoucher.kode);
+    showPage('result');
+    return;
+  }
+  recentUsed.unshift({ kode: res.voucher.kode, nilai: res.voucher.nilai_rupiah, tgl: res.voucher.tgl_dipakai });
+  if (recentUsed.length > 10) recentUsed.length = 10;
+  rs_show(true, 'Voucher Berhasil Dipakai',
+    'Silakan berikan barang senilai Rp ' + Number(res.voucher.nilai_rupiah).toLocaleString('id-ID') + ' kepada pelanggan.',
+    res.voucher.kode);
+  showPage('result');
+}
+
+/* ============================================================
+   RESULT
+============================================================ */
+function rs_show(ok, title, msg, kode) {
+  var block = document.getElementById('rs-block');
+  block.className = 'result-hasil ' + (ok ? 'ok' : 'err');
+  document.getElementById('rs-icon').textContent  = ok ? '✅' : '❌';
+  document.getElementById('rs-title').textContent = title;
+  document.getElementById('rs-msg').textContent   = msg;
+  document.getElementById('rs-kode-box').textContent = kode || '';
+}
+
+/* ============================================================
+   SERVICE WORKER
+============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.warn('SW register failed:', err);
+    });
+  });
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+if (merchant) showPage('scanner'); else showPage('login');
+</script>
+</body>
+</html>

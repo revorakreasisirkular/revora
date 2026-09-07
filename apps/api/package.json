@@ -1,0 +1,9 @@
+{
+  "name": "revora-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Revora Bottle Save — API proxy to Apps Script (Vercel Serverless)",
+  "engines": {
+    "node": ">=20"
+  }
+}
