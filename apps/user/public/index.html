@@ -164,7 +164,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <p>Bank Sampah Botol Plastik</p>
     </div>
     <div id="lg-err" class="alert"></div>
-    <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="email@contoh.com" autocomplete="username"></div>
+    <div class="field"><label>Nomor HP</label><input id="lg-hp" type="tel" placeholder="08xxxxxxxxxx atau +62..." autocomplete="username" inputmode="tel"></div>
     <div class="field"><label>PIN (6 digit)</label><input id="lg-pin" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
     <button class="btn btn-primary" id="lg-btn" onclick="doLogin()">Masuk</button>
     <div class="divider"><hr><span>atau</span><hr></div>
@@ -185,8 +185,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
     <div id="rg-step1">
       <div class="field"><label>Nama Lengkap *</label><input id="rg-nama" type="text" placeholder="Nama lengkap"></div>
-      <div class="field"><label>Email *</label><input id="rg-email" type="email" placeholder="email@contoh.com"></div>
-      <div class="field"><label>No. HP *</label><input id="rg-hp" type="tel" placeholder="08xxxxxxxxxx"></div>
+      <div class="field"><label>No. HP * <span style="font-weight:400;color:#888;font-size:11px">(dipakai untuk login)</span></label><input id="rg-hp" type="tel" placeholder="08xxxxxxxxxx atau +62..." inputmode="tel"></div>
+      <div class="field"><label>Email * <span style="font-weight:400;color:#888;font-size:11px">(cadangan &amp; notifikasi)</span></label><input id="rg-email" type="email" placeholder="email@contoh.com"></div>
       <button class="btn btn-primary" onclick="rgGoStep2()">Lanjut →</button>
       <div class="link">Sudah punya akun? <a onclick="showPage('login')">Masuk</a></div>
     </div>
@@ -204,7 +204,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div id="rg-step3" class="ok-block">
       <div class="ic">✅</div>
       <h3>Registrasi Berhasil!</h3>
-      <p>Login berikutnya cukup pakai email &amp; PIN yang tadi kamu daftarkan</p>
+      <p>Login berikutnya cukup pakai nomor HP &amp; PIN yang tadi kamu daftarkan</p>
       <div class="uid-box" id="rg-hasil-uid">—</div>
       <p style="font-size:12px;color:#999">(User ID kamu — untuk referensi identitas)</p>
       <button class="btn btn-primary" style="margin-top:16px" onclick="showPage('login')">Lanjut ke Login</button>
@@ -226,7 +226,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="ava" id="hm-ava">?</div>
         <div style="min-width:0">
           <div class="hero-name" id="hm-nama">—</div>
-          <div class="hero-email" id="hm-email">—</div>
+          <div class="hero-email" id="hm-hp">—</div>
           <div class="pills">
             <span class="pill">🪙 <span id="hm-poin">0</span> poin</span>
             <span class="pill">🍶 <span id="hm-botol">0</span> botol</span>
@@ -388,8 +388,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       </div>
       <div class="card" id="pf-edit-card" style="display:none;margin-bottom:16px">
         <div class="field" style="margin-top:0"><label>Nama Lengkap</label><input id="pf-e-nama" type="text"></div>
-        <div class="field"><label>No. HP</label><input id="pf-e-hp" type="tel"></div>
         <div class="field"><label>Alamat</label><input id="pf-e-alamat" type="text"></div>
+        <p style="font-size:12px;color:#888;margin-bottom:12px">
+          <em>No. HP &amp; email tidak bisa diubah dari sini karena dipakai untuk login.
+          Hubungi admin kalau perlu ganti.</em>
+        </p>
         <div class="row" style="margin-top:6px">
           <button class="btn btn-outline" onclick="pfToggleEdit()">Batal</button>
           <button class="btn btn-primary" id="pf-btn-save" onclick="pfSave()">💾 Simpan</button>
@@ -464,6 +467,18 @@ function fmtDate(d) {
   return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})
     + ' ' + dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
 }
+// Format HP kanonik (628xxxxxxxxx) untuk display: "+62 812-3456-7890"
+function formatHP(hp) {
+  if (!hp) return '-';
+  var s = String(hp);
+  if (s.substring(0,2) !== '62') return s;
+  // Buang "62" awalan, sisanya potong: 3-4-4 (misal 812 3456 7890)
+  var rest = s.substring(2);
+  var a = rest.substring(0, 3);
+  var b = rest.substring(3, 7);
+  var c = rest.substring(7);
+  return '+62 ' + [a, b, c].filter(Boolean).join('-');
+}
 function showAlert(id, msg, ok) {
   var el = document.getElementById(id);
   el.textContent = msg;
@@ -477,22 +492,42 @@ function setBusy(btnId, on) {
 }
 
 /* ============================================================
-   LOGIN & REGISTER (email + PIN 6 digit)
+   LOGIN & REGISTER (HP + PIN 6 digit)
 ============================================================ */
+
+// Normalisasi HP di sisi klien — supaya validasi cepat sebelum request server.
+// Backend akan normalisasi ulang, jadi ini cuma UX (feedback instan).
+// Return string 628xxx atau null kalau format tidak valid.
+function normalizeHP(input) {
+  if (!input) return null;
+  var digits = String(input).replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.charAt(0) === '0')      digits = '62' + digits.substring(1);
+  else if (digits.substring(0,2) === '62') { /* already */ }
+  else if (digits.charAt(0) === '8') digits = '62' + digits;
+  else return null;
+  if (digits.length < 11 || digits.length > 14) return null;
+  if (digits.substring(0,3) !== '628') return null;
+  return digits;
+}
+
 async function doLogin() {
-  var email = document.getElementById('lg-email').value.trim();
+  var hpRaw = document.getElementById('lg-hp').value.trim();
   var pin   = document.getElementById('lg-pin').value.trim();
-  if (!email || !pin) return showAlert('lg-err', 'Email dan PIN wajib diisi');
+  if (!hpRaw || !pin) return showAlert('lg-err', 'Nomor HP dan PIN wajib diisi');
   if (!/^\d{6}$/.test(pin)) return showAlert('lg-err', 'PIN harus 6 digit angka');
 
+  var hp = normalizeHP(hpRaw);
+  if (!hp) return showAlert('lg-err', 'Format nomor HP tidak valid (contoh: 08123456789 atau +6281234567890)');
+
   setBusy('lg-btn', true);
-  var res = await API.loginUser({ email: email, pin: pin });
+  var res = await API.loginUser({ hp: hp, pin: pin });
   setBusy('lg-btn', false);
   if (!res || !res.ok) return showAlert('lg-err', (res && res.msg) || 'Login gagal');
 
   user = res.profile;
   sessionStorage.setItem('revora_user', JSON.stringify(user));
-  document.getElementById('lg-email').value = '';
+  document.getElementById('lg-hp').value = '';
   document.getElementById('lg-pin').value = '';
   showPage('home');
 }
@@ -505,11 +540,13 @@ document.addEventListener('keydown', function(e) {
 function rgGoStep2() {
   var nama  = document.getElementById('rg-nama').value.trim();
   var email = document.getElementById('rg-email').value.trim();
-  var hp    = document.getElementById('rg-hp').value.trim();
+  var hpRaw = document.getElementById('rg-hp').value.trim();
   if (!nama)  return showAlert('rg-err', 'Nama wajib diisi');
+  if (!hpRaw) return showAlert('rg-err', 'No. HP wajib diisi');
+  if (!normalizeHP(hpRaw))
+    return showAlert('rg-err', 'Format nomor HP tidak valid (contoh: 08123456789 atau +6281234567890)');
   if (!email) return showAlert('rg-err', 'Email wajib diisi');
   if (!/^\S+@\S+\.\S+$/.test(email)) return showAlert('rg-err', 'Format email tidak valid');
-  if (!hp)    return showAlert('rg-err', 'No. HP wajib diisi');
   document.getElementById('rg-step1').style.display = 'none';
   document.getElementById('rg-step2').style.display = 'block';
   document.getElementById('rg-s2').className = 'step done';
@@ -522,7 +559,7 @@ function rgBackStep1() {
 async function doRegister() {
   var nama   = document.getElementById('rg-nama').value.trim();
   var email  = document.getElementById('rg-email').value.trim();
-  var hp     = document.getElementById('rg-hp').value.trim();
+  var hpRaw  = document.getElementById('rg-hp').value.trim();
   var alamat = document.getElementById('rg-alamat').value.trim();
   var pin    = document.getElementById('rg-pin').value.trim();
   var pin2   = document.getElementById('rg-pin2').value.trim();
@@ -530,8 +567,9 @@ async function doRegister() {
   if (!/^\d{6}$/.test(pin)) return showAlert('rg-err', 'PIN harus 6 digit angka');
   if (pin !== pin2)         return showAlert('rg-err', 'Konfirmasi PIN tidak cocok');
 
+  // Kirim HP mentah — backend yang normalisasi authoritative
   setBusy('rg-btn', true);
-  var res = await API.registerUser({ nama: nama, email: email, hp: hp, alamat: alamat, pin: pin });
+  var res = await API.registerUser({ nama: nama, email: email, hp: hpRaw, alamat: alamat, pin: pin });
   setBusy('rg-btn', false);
   if (!res || !res.ok) return showAlert('rg-err', (res && res.msg) || 'Registrasi gagal');
 
@@ -549,12 +587,12 @@ function hmRender() {
   var inisial = (user.nama||'?').split(' ').map(function(w){return w[0]}).join('').substr(0,2).toUpperCase();
   document.getElementById('hm-ava').textContent   = inisial;
   document.getElementById('hm-nama').textContent  = user.nama;
-  document.getElementById('hm-email').textContent = user.email;
+  document.getElementById('hm-hp').textContent    = formatHP(user.hp);
   document.getElementById('hm-poin').textContent  = (user.total_poin||0).toLocaleString('id-ID');
   document.getElementById('hm-botol').textContent = (user.total_botol||0).toLocaleString('id-ID');
 }
 async function hmLoadActivity() {
-  var res = await API.getHistory({ email: user.email, limit: 5 });
+  var res = await API.getHistory({ hp: user.hp, limit: 5 });
   var el = document.getElementById('hm-act-list');
   if (!res || !res.ok || !res.history.length) { el.innerHTML = '<div class="empty">Belum ada aktivitas</div>'; return; }
   el.innerHTML = res.history.slice(0, 5).map(function(h) {
@@ -569,7 +607,7 @@ async function hmLoadActivity() {
   }).join('');
 }
 async function hmRefreshProfile() {
-  var res = await API.getProfile({ email: user.email });
+  var res = await API.getProfile({ hp: user.hp });
   if (res && res.ok) {
     user = res.profile;
     sessionStorage.setItem('revora_user', JSON.stringify(user));
@@ -586,7 +624,7 @@ function rdRender() {
   document.getElementById('rd-botol').textContent = (user.total_botol||0).toLocaleString('id-ID') + ' botol';
 }
 async function rdLoadMyVouchers() {
-  var res = await API.getMyVouchers({ email: user.email });
+  var res = await API.getMyVouchers({ hp: user.hp });
   var area = document.getElementById('rd-my-list');
   if (!res || !res.ok || !res.vouchers.length) {
     area.innerHTML = '<div class="empty">Belum ada voucher. Tukar poinmu sekarang!</div>';
@@ -621,7 +659,7 @@ async function rdDoRedeem() {
   if (!confirm('Tukar 100 poin dengan Voucher Rp 10.000?')) return;
 
   setBusy('rd-btn-redeem', true);
-  var res = await API.redeemVoucher({ email: user.email });
+  var res = await API.redeemVoucher({ hp: user.hp });
   setBusy('rd-btn-redeem', false);
   if (!res || !res.ok) return showAlert('rd-err', (res && res.msg) || 'Gagal redeem');
 
@@ -697,7 +735,7 @@ function rwRenderList() {
   }).join('');
 }
 async function rwLoad() {
-  var res = await API.getHistory({ email: user.email, limit: 200 });
+  var res = await API.getHistory({ hp: user.hp, limit: 200 });
   if (res && res.ok) { rwAll = res.history; rwRenderList(); }
   else { document.getElementById('rw-list').innerHTML = '<div class="empty">Gagal memuat riwayat</div>'; }
 }
@@ -716,10 +754,9 @@ function pfFill(u) {
   document.getElementById('pf-botol').textContent    = (u.total_botol||0).toLocaleString('id-ID');
   document.getElementById('pf-kg').textContent       = ((u.total_botol||0)*0.025).toFixed(1);
   document.getElementById('pf-uid').textContent      = u.user_id||'-';
-  document.getElementById('pf-hp').textContent       = u.hp||'-';
+  document.getElementById('pf-hp').textContent       = formatHP(u.hp);
   document.getElementById('pf-alamat').textContent   = u.alamat||'-';
   document.getElementById('pf-e-nama').value    = u.nama||'';
-  document.getElementById('pf-e-hp').value      = u.hp||'';
   document.getElementById('pf-e-alamat').value  = u.alamat||'';
 }
 function pfToggleEdit() {
@@ -731,12 +768,11 @@ function pfToggleEdit() {
 }
 async function pfSave() {
   var nama   = document.getElementById('pf-e-nama').value.trim();
-  var hp     = document.getElementById('pf-e-hp').value.trim();
   var alamat = document.getElementById('pf-e-alamat').value.trim();
   if (!nama) return showAlert('pf-err', 'Nama tidak boleh kosong');
 
   setBusy('pf-btn-save', true);
-  var res = await API.updateProfile({ email: user.email, nama: nama, hp: hp, alamat: alamat });
+  var res = await API.updateProfile({ hp: user.hp, nama: nama, alamat: alamat });
   setBusy('pf-btn-save', false);
   if (!res || !res.ok) return showAlert('pf-err', (res && res.msg) || 'Gagal menyimpan profil');
 
@@ -751,7 +787,7 @@ async function pfRegisterCard() {
   if (!uid) return showAlert('pf-err', 'Masukkan UID kartu terlebih dahulu');
 
   setBusy('pf-btn-card', true);
-  var res = await API.registerCard({ email: user.email, card_uid: uid });
+  var res = await API.registerCard({ hp: user.hp, card_uid: uid });
   setBusy('pf-btn-card', false);
   if (!res || !res.ok) return showAlert('pf-err', (res && res.msg) || 'Gagal menautkan kartu');
 
