@@ -399,16 +399,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
       </div>
 
-      <p class="slabel">Kartu RFID Bank Sampah</p>
-      <div class="card" style="margin-bottom:16px">
-        <p style="font-size:12.5px;color:#888;line-height:1.5;margin-bottom:12px">
-          Tautkan kartu RFID supaya kamu tinggal tap kartu di alat, tanpa perlu buka aplikasi.
-          Minta petugas membacakan UID kartu dari alat, lalu masukkan di bawah ini.
-        </p>
-        <div class="field" style="margin-top:0"><label>UID Kartu</label><input id="pf-card-uid" type="text" placeholder="Contoh: A1B2C3D4" style="text-transform:uppercase"></div>
-        <button class="btn btn-primary" id="pf-btn-card" onclick="pfRegisterCard()">💳 Tautkan Kartu</button>
-      </div>
-
       <p class="slabel">Lainnya</p>
       <div class="action-list">
         <div class="alink" onclick="showPage('riwayat')">📋 Riwayat Transaksi<span class="arr">›</span></div>
@@ -781,18 +771,6 @@ async function pfSave() {
   pfFill(user);
   pfToggleEdit();
   showAlert('pf-ok', '✅ Profil berhasil diperbarui', true);
-}
-async function pfRegisterCard() {
-  var uid = document.getElementById('pf-card-uid').value.trim().toUpperCase();
-  if (!uid) return showAlert('pf-err', 'Masukkan UID kartu terlebih dahulu');
-
-  setBusy('pf-btn-card', true);
-  var res = await API.registerCard({ hp: user.hp, card_uid: uid });
-  setBusy('pf-btn-card', false);
-  if (!res || !res.ok) return showAlert('pf-err', (res && res.msg) || 'Gagal menautkan kartu');
-
-  document.getElementById('pf-card-uid').value = '';
-  showAlert('pf-ok', '✅ ' + res.msg, true);
 }
 
 /* ============================================================
