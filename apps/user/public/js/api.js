@@ -40,7 +40,6 @@
     getMyVouchers      : (p) => callAPI('get_my_vouchers', p),
     redeemVoucher      : (p) => callAPI('redeem',          p),
     updateProfile      : (p) => callAPI('update_profile',  p),
-    registerCard       : (p) => callAPI('register_card',   p),
     loginMerchant      : (p) => callAPI('login_merchant',  p),
     scanVoucher        : (p) => callAPI('scan_voucher',    p),
     confirmVoucherUsage: (p) => callAPI('confirm_voucher', p),
