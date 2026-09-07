@@ -1,11 +1,18 @@
 // ============================================================
 //  03_Auth.gs — AUTENTIKASI & PROFIL
 // ============================================================
-//  Semua auth pakai email + PIN 6 digit (baik user maupun merchant).
+//  IDENTIFIER LOGIN v6.1:
+//    - User    : login pakai NOMOR HP (normalized ke 628xxx) + PIN 6 digit
+//    - Merchant: login pakai EMAIL + PIN 6 digit (merchant lebih formal,
+//                biasanya punya email toko)
+//
+//  Email di user tetap WAJIB diisi saat register (backup identifier,
+//  untuk kontak notifikasi nanti), tapi bukan untuk login.
+//
 //  PIN disimpan sebagai hash sederhana (_hashSimple di 99_Helpers.gs).
 // ============================================================
 
-/** Register user baru (dari PWA). */
+/** Register user baru (dari PWA). HP dinormalisasi ke 628xxx sebelum simpan. */
 function registerUser(data) {
   const lock = LockService.getScriptLock();
   try {
@@ -17,23 +24,31 @@ function registerUser(data) {
   try {
     const nama   = (data.nama || '').trim();
     const email  = (data.email || '').trim().toLowerCase();
-    const hp     = (data.hp || '').trim();
+    const hpRaw  = (data.hp || '').trim();
     const alamat = (data.alamat || '').trim();
     const pin    = String(data.pin || '').trim();
 
-    if (!nama || !email || !hp || !pin)
+    if (!nama || !email || !hpRaw || !pin)
       return { ok: false, msg: 'Nama, email, HP, dan PIN wajib diisi' };
     if (!/^\S+@\S+\.\S+$/.test(email))
       return { ok: false, msg: 'Format email tidak valid' };
     if (!/^\d{6}$/.test(pin))
       return { ok: false, msg: 'PIN harus 6 digit angka' };
 
+    // Normalisasi HP ke format kanonik (628xxx)
+    const hp = _normalizeHP(hpRaw);
+    if (!hp)
+      return { ok: false, msg: 'Format nomor HP tidak valid (gunakan 08xx, 62xx, atau +62xx dengan 10-13 digit)' };
+
     const ss   = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sh   = ss.getSheetByName(SH.USERS);
     const rows = sh.getDataRange().getValues();
 
-    // Cek email belum terpakai
+    // Cek HP belum terpakai (identifier utama)
     for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][3]) === hp)
+        return { ok: false, msg: 'Nomor HP sudah terdaftar. Silakan login.' };
+      // Email juga harus unik (backup identifier)
       if (String(rows[i][2]).toLowerCase() === email)
         return { ok: false, msg: 'Email sudah terdaftar' };
     }
@@ -51,19 +66,21 @@ function registerUser(data) {
   }
 }
 
-/** Login user (email + PIN). Return profile lengkap. */
+/** Login user (HP + PIN). HP di-normalize dulu sebelum dicocokkan. */
 function loginUser(data) {
   try {
-    const email = (data.email || '').trim().toLowerCase();
+    const hpRaw = (data.hp || '').trim();
     const pin   = String(data.pin || '').trim();
-    if (!email || !pin) return { ok: false, msg: 'Email dan PIN wajib diisi' };
-    if (!/^\S+@\S+\.\S+$/.test(email))
-      return { ok: false, msg: 'Format email tidak valid' };
+    if (!hpRaw || !pin) return { ok: false, msg: 'Nomor HP dan PIN wajib diisi' };
     if (!/^\d{6}$/.test(pin))
       return { ok: false, msg: 'PIN harus 6 digit angka' };
 
-    const row = _findUserByEmail(email);
-    if (!row) return { ok: false, msg: 'Email tidak terdaftar' };
+    const hp = _normalizeHP(hpRaw);
+    if (!hp)
+      return { ok: false, msg: 'Format nomor HP tidak valid' };
+
+    const row = _findUserByHP(hp);
+    if (!row) return { ok: false, msg: 'Nomor HP tidak terdaftar' };
     if (row[5] !== _hashSimple(pin))
       return { ok: false, msg: 'PIN salah' };
 
@@ -73,13 +90,16 @@ function loginUser(data) {
   }
 }
 
-/** Update profil user. Email TIDAK bisa diubah lewat sini (jadi identitas login). */
+/** Update profil user. HP TIDAK bisa diubah lewat sini (jadi identitas login).
+ *  Email juga tidak (backup identifier — nanti bisa ditambah proses verifikasi). */
 function updateProfile(data) {
   try {
-    const email = (data.email || '').trim().toLowerCase();
-    if (!email) return { ok: false, msg: 'Email kosong' };
+    const hpRaw = (data.hp || '').trim();
+    if (!hpRaw) return { ok: false, msg: 'HP kosong' };
+    const hp = _normalizeHP(hpRaw);
+    if (!hp) return { ok: false, msg: 'Format HP tidak valid' };
 
-    const row = _findUserByEmail(email);
+    const row = _findUserByHP(hp);
     if (!row) return { ok: false, msg: 'User tidak ditemukan' };
 
     const ss  = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -87,12 +107,10 @@ function updateProfile(data) {
     const idx = _findUserRowIndex(sh, row[0]);
 
     const nama   = (data.nama   || row[1]).toString().trim();
-    const hp     = (data.hp     || row[3]).toString().trim();
     const alamat = (data.alamat != null ? data.alamat : row[4]).toString().trim();
 
-    // Kolom 2=Nama, 4=HP, 5=Alamat (skip 3=Email)
+    // Kolom 2=Nama, 5=Alamat (skip 3=Email dan 4=HP — keduanya identifier)
     sh.getRange(idx, 2).setValue(nama);
-    sh.getRange(idx, 4).setValue(hp);
     sh.getRange(idx, 5).setValue(alamat);
 
     const updatedRow = _findUser(row[0]);
@@ -102,7 +120,7 @@ function updateProfile(data) {
   }
 }
 
-/** Login merchant (email + PIN). */
+/** Login merchant (email + PIN) — MERCHANT tetap pakai email. */
 function loginMerchant(data) {
   try {
     const email = (data.email || '').trim().toLowerCase();

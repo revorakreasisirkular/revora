@@ -16,11 +16,10 @@ function registerCard(data) {
   }
 
   try {
-    const email   = (data.email || '').trim().toLowerCase();
     const cardUid = (data.card_uid || '').trim().toUpperCase();
-    if (!email || !cardUid) return { ok: false, msg: 'Parameter tidak lengkap' };
+    if (!cardUid) return { ok: false, msg: 'UID kartu kosong' };
 
-    const userRow = _findUserByEmail(email);
+    const userRow = _resolveUser(data);
     if (!userRow) return { ok: false, msg: 'User tidak ditemukan' };
 
     const ss   = SpreadsheetApp.openById(SPREADSHEET_ID);

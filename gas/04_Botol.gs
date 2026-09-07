@@ -16,6 +16,7 @@ function inputBotol(data) {
   }
 
   try {
+    const hpRaw    = (data.hp || '').trim();
     const email    = (data.email || '').trim().toLowerCase();
     const userId   = (data.user_id || '').trim().toUpperCase();
     const jumlah   = parseInt(data.jumlah, 10);
@@ -33,11 +34,15 @@ function inputBotol(data) {
     if (!jumlah || jumlah < 1)
       return { ok: false, msg: 'Parameter jumlah tidak valid' };
 
-    // Cari user: email diprioritaskan, fallback ke user_id
+    // Cari user: HP diprioritaskan (identifier utama), fallback email atau user_id
     let userRow = null;
-    if (email) userRow = _findUserByEmail(email);
-    else if (userId) userRow = _findUser(userId);
-    if (!userRow) return { ok: false, msg: 'User tidak ditemukan (email/user_id salah)' };
+    if (hpRaw) {
+      const hp = _normalizeHP(hpRaw);
+      if (hp) userRow = _findUserByHP(hp);
+    }
+    if (!userRow && email) userRow = _findUserByEmail(email);
+    if (!userRow && userId) userRow = _findUser(userId);
+    if (!userRow) return { ok: false, msg: 'User tidak ditemukan (hp/email/user_id salah)' };
 
     // Tulis transaksi
     const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);

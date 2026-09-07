@@ -4,12 +4,11 @@
 //  Handler read-only. Aman dipanggil sesering apapun.
 // ============================================================
 
-/** Ambil profil user (dengan total poin & botol yang di-hitung agregat). */
+/** Ambil profil user (dengan total poin & botol yang di-hitung agregat).
+ *  Terima parameter `hp` (utama) atau `email` (fallback). */
 function getProfile(data) {
   try {
-    const email = (data.email || '').trim().toLowerCase();
-    if (!email) return { ok: false, msg: 'Email kosong' };
-    const row = _findUserByEmail(email);
+    const row = _resolveUser(data);
     if (!row) return { ok: false, msg: 'User tidak ditemukan' };
     return { ok: true, profile: _buildProfile(row) };
   } catch (err) {
@@ -18,12 +17,15 @@ function getProfile(data) {
 }
 
 /** Riwayat gabungan dari TransaksiBotol + TransaksiVoucher,
- *  diurutkan descending berdasarkan timestamp. */
+ *  diurutkan descending berdasarkan timestamp.
+ *  Terima parameter `hp` (utama) atau `email` (fallback). */
 function getHistory(data) {
   try {
-    const email = (data.email || '').trim().toLowerCase();
     const limit = data.limit || 100;
-    if (!email) return { ok: false, msg: 'Email kosong', history: [] };
+
+    const userRow = _resolveUser(data);
+    if (!userRow) return { ok: false, msg: 'User tidak ditemukan', history: [] };
+    const userIdMe = String(userRow[0]).toUpperCase();
 
     const ss   = SpreadsheetApp.openById(SPREADSHEET_ID);
     const shTB = ss.getSheetByName(SH.TRANSAKSI_BOTOL);
@@ -31,10 +33,10 @@ function getHistory(data) {
 
     const history = [];
 
-    // Baca TransaksiBotol
+    // Baca TransaksiBotol — filter by UserID (lebih stabil dari email)
     const tbRows = shTB.getDataRange().getValues();
     for (let i = 1; i < tbRows.length; i++) {
-      if (String(tbRows[i][2]).toLowerCase() === email) {
+      if (String(tbRows[i][1]).toUpperCase() === userIdMe) {
         history.push({
           trx_id    : tbRows[i][0],
           tipe      : 'INPUT',
@@ -46,10 +48,10 @@ function getHistory(data) {
       }
     }
 
-    // Baca TransaksiVoucher (REDEEM & USED)
+    // Baca TransaksiVoucher (REDEEM & USED) — filter by UserID
     const tvRows = shTV.getDataRange().getValues();
     for (let i = 1; i < tvRows.length; i++) {
-      if (String(tvRows[i][2]).toLowerCase() === email) {
+      if (String(tvRows[i][1]).toUpperCase() === userIdMe) {
         history.push({
           trx_id    : tvRows[i][0],
           tipe      : tvRows[i][3], // REDEEM atau USED

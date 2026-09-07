@@ -18,11 +18,8 @@ function redeemVoucher(data) {
   }
 
   try {
-    const email = (data.email || '').trim().toLowerCase();
-    if (!email) return { ok: false, msg: 'Email kosong' };
-
-    const userRow = _findUserByEmail(email);
-    if (!userRow) return { ok: false, msg: 'User tidak ditemukan' };
+    const userRow = _resolveUser(data);
+    if (!userRow) return { ok: false, msg: 'User tidak ditemukan (hp atau email salah)' };
 
     const totals = _hitungTotalUser(userRow[0]);
     if (totals.poin < VOUCHER_POIN)
@@ -75,8 +72,9 @@ function _generateKodeVoucher(shRed) {
 /** List semua voucher milik user (aktif & hangus). */
 function getMyVouchers(data) {
   try {
-    const email = (data.email || '').trim().toLowerCase();
-    if (!email) return { ok: false, msg: 'Email kosong', vouchers: [] };
+    const userRow = _resolveUser(data);
+    if (!userRow) return { ok: false, msg: 'User tidak ditemukan', vouchers: [] };
+    const userIdMe = String(userRow[0]).toUpperCase();
 
     const ss   = SpreadsheetApp.openById(SPREADSHEET_ID);
     const sh   = ss.getSheetByName(SH.VOUCHER_REDEEMED);
@@ -85,7 +83,9 @@ function getMyVouchers(data) {
     const vouchers = [];
     // Iterate reverse supaya yang terbaru muncul dulu
     for (let i = rows.length - 1; i >= 1; i--) {
-      if (String(rows[i][2]).toLowerCase() === email) {
+      // Kolom: KodeVoucher[0] | UserID[1] | Email[2] | ...
+      // Match by UserID (lebih stabil daripada email)
+      if (String(rows[i][1]).toUpperCase() === userIdMe) {
         vouchers.push({
           kode         : rows[i][0],
           nilai_rupiah : rows[i][3],
