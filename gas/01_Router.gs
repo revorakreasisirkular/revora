@@ -9,7 +9,6 @@
 //    03_Auth.gs      → register, login, loginMerchant, updateProfile
 //    04_Botol.gs     → inputBotol
 //    05_Voucher.gs   → redeem, scanVoucher, confirmVoucher, getMyVouchers
-//    06_Kartu.gs     → registerCard, identifyCard
 //    07_Profil.gs    → getProfile, getHistory
 // ============================================================
 
@@ -57,9 +56,6 @@ function doPost(e) {
         get_my_vouchers: getMyVouchers,         // 05_Voucher.gs
         scan_voucher   : scanVoucher,           // 05_Voucher.gs
         confirm_voucher: confirmVoucherUsage,   // 05_Voucher.gs
-
-        register_card  : registerCard,          // 06_Kartu.gs
-        identify_card  : identifyCard,          // 06_Kartu.gs
 
         get_profile    : getProfile,            // 07_Profil.gs
         get_history    : getHistory,            // 07_Profil.gs

@@ -1,6 +1,6 @@
 # Google Apps Script (Backend Database)
 
-Backend logic untuk Revora Bottle Save. Dipecah jadi 9 file supaya
+Backend logic untuk Revora Bottle Save. Dipecah jadi 8 file supaya
 tiap file pendek dan mudah dibaca/diedit.
 
 ## Struktur file
@@ -11,10 +11,9 @@ tiap file pendek dan mudah dibaca/diedit.
 | `01_Router.gs` | `doGet` + `doPost` + dispatcher | 77 |
 | `02_Init.gs` | `initSpreadsheet()` (jalankan 1x saat setup) | 79 |
 | `03_Auth.gs` | Register user, login user & merchant, update profil | 133 |
-| `04_Botol.gs` | Terima input dari Raspberry Pi | 66 |
+| `04_Botol.gs` | Terima input botol dari alat ESP32 | 71 |
 | `05_Voucher.gs` | Redeem, list, scan, konfirmasi voucher | 202 |
-| `06_Kartu.gs` | Tautkan & identifikasi kartu RFID | 80 |
-| `07_Profil.gs` | Get profil & riwayat (read-only) | 70 |
+| `07_Profil.gs` | Get profil & riwayat (read-only) | 72 |
 | `99_Helpers.gs` | Semua fungsi bantu (`_findX`, `_hashSimple`, dll) | 156 |
 
 **Prefix angka** (00, 01, ..., 99) supaya file terurut di sidebar Apps Script editor —

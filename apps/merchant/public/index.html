@@ -3,68 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#BA7517">
-<title>Revora Merchant — Scan Voucher</title>
+<meta name="theme-color" content="#0A0A0A">
+<title>REVORA Merchant — Scan Voucher</title>
 
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/logo-mark.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Revora Merchant">
+<meta name="apple-mobile-web-app-title" content="REVORA Merchant">
 
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
+/* ============================================================
+   REVORA MERCHANT — DESIGN TOKENS
+   Palette: Ink primary + Bone bg + Bark aksen brand merchant
+============================================================ */
+:root{
+  --ink:#0A0A0A;
+  --ink-2:#1a1a1a;
+  --ink-3:#3a3a3a;
+  --bone:#F5F5F0;
+  --paper:#FFFFFF;
+  --line:#e6e6df;
+  --line-2:#efefe8;
+  --mute:#8a8a80;
+  --mute-2:#b8b8ac;
+  --bark:#8B6F47;
+  --bark-d:#6d5637;
+  --bark-l:#EFE9DF;
+  --leaf:#4A7C59;
+  --leaf-d:#385F44;
+  --leaf-l:#EBF1ED;
+  --danger:#B23A3A;
+  --danger-bg:#F9EBEB;
+  --info:#3A6EB2;
+  --info-bg:#EAF1F9;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f2f4f2;min-height:100vh;color:#111}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;background:var(--bone);min-height:100vh;color:var(--ink);-webkit-font-smoothing:antialiased}
 
-.auth-bg{display:none;min-height:100vh;background:linear-gradient(160deg,#8f5a11 0%,#BA7517 45%,#DA9330 100%);align-items:center;justify-content:center;padding:20px}
+.rv-logo{display:inline-block;color:var(--ink);line-height:0}
+.rv-logo svg{display:block;width:100%;height:100%}
+.rv-logo-sm{width:24px;height:26px}
+.rv-logo-lg{width:72px;height:80px}
+
+/* ===== Auth ===== */
+.auth-bg{display:none;min-height:100vh;background:var(--bone);align-items:center;justify-content:center;padding:20px}
 .auth-bg.active{display:flex}
-.auth-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:32px 26px;box-shadow:0 20px 50px rgba(80,50,0,.25)}
-.logo{text-align:center;margin-bottom:28px}
-.logo-circle{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#BA7517,#8f5a11);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;box-shadow:0 8px 20px rgba(186,117,23,.35)}
-.logo h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
-.logo p{font-size:13px;color:#888;margin-top:3px}
+.auth-card{width:100%;max-width:400px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:36px 28px}
+.logo{text-align:center;margin-bottom:28px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.logo .rv-logo{color:var(--bark)}
+.logo h1{font-size:24px;font-weight:800;letter-spacing:.08em;color:var(--ink)}
+.logo .badge{background:var(--bark-l);color:var(--bark-d);padding:2px 8px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.logo p{font-size:12.5px;color:var(--mute);margin-top:6px;letter-spacing:.02em}
 
-.app-bg{display:none;min-height:100vh}
+/* ===== App shell ===== */
+.app-bg{display:none;min-height:100vh;background:var(--bone)}
 .app-bg.active{display:block}
-.shell{max-width:520px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,.05)}
-.top{background:linear-gradient(135deg,#BA7517,#8f5a11);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.top h1{font-size:17px;font-weight:800}
-.top p{font-size:12px;opacity:.82;margin-top:2px;word-break:break-all}
-.logout-btn{background:rgba(255,255,255,.18);border:none;color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;flex-shrink:0}
+.shell{max-width:520px;margin:0 auto;min-height:100vh;background:var(--paper);display:flex;flex-direction:column;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.top{background:var(--ink);color:var(--paper);padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.top-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.top .rv-logo{color:var(--paper);flex-shrink:0}
+.top h1{font-size:15px;font-weight:800;letter-spacing:.04em}
+.top p{font-size:11.5px;opacity:.65;margin-top:2px;word-break:break-all;font-family:'SF Mono','Courier New',monospace;letter-spacing:.03em}
+.logout-btn{background:rgba(255,255,255,.12);border:none;color:var(--paper);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;flex-shrink:0;letter-spacing:.06em;text-transform:uppercase}
+.logout-btn:hover{background:rgba(255,255,255,.2)}
 
 .content{padding:20px;flex:1;overflow-y:auto}
-.slabel{font-size:11px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
+.slabel{font-size:10.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
 
 .field{margin-bottom:14px}
-.field label{display:block;font-size:12.5px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
-.field input{width:100%;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 14px;font-size:15px;background:#fafafa;outline:none;transition:.15s}
-.field input:focus{border-color:#BA7517;background:#fff;box-shadow:0 0 0 3px rgba(186,117,23,.12)}
-.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'Courier New',monospace;font-size:20px!important;font-weight:800!important}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.field input{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font-size:15px;color:var(--ink);background:var(--paper);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.field input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,.06)}
+.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'SF Mono','Courier New',monospace;font-size:20px!important;font-weight:700!important}
 
-.btn{width:100%;height:48px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{transform:scale(.98)}
-.btn:disabled{opacity:.6;cursor:default}
-.btn-primary{background:linear-gradient(135deg,#BA7517,#8f5a11);color:#fff;box-shadow:0 6px 16px rgba(186,117,23,.3)}
-.btn-outline{background:#fff;border:1.5px solid #BA7517;color:#BA7517}
-.btn-success{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;box-shadow:0 6px 16px rgba(29,158,117,.3)}
+.btn{width:100%;height:48px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .05s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.04em;text-transform:uppercase;font-family:inherit}
+.btn:active{transform:scale(.985)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--ink-2)}
+.btn-outline{background:var(--paper);border:1px solid var(--ink);color:var(--ink)}
+.btn-outline:hover{background:var(--bone)}
+.btn-bark{background:var(--bark);color:var(--paper)}
+.btn-bark:hover{background:var(--bark-d)}
+.btn-success{background:var(--leaf);color:var(--paper)}
+.btn-success:hover{background:var(--leaf-d)}
 
-.alert{border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:#fdecec;color:#c62828;border:1px solid #f6c8c8}
+.alert{border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:var(--danger-bg);color:var(--danger);border:1px solid #f0d5d5}
 .alert.show{display:block}
-.alert-ok{background:#e1f5ee;color:#0a6644;border-color:#b8e3d1}
-.alert-info{background:#eaf2fb;color:#1a4d80;border-color:#c8dcf3}
+.alert-ok{background:var(--leaf-l);color:var(--leaf-d);border-color:#d3e2d7}
+.alert-info{background:var(--info-bg);color:var(--info);border-color:#cdddef}
 
-.card{background:#fff;border:1px solid #ececec;border-radius:14px;padding:16px}
-.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--paper);border-radius:50%;animation:spin .7s linear infinite}
+.btn-outline .spinner{border-color:rgba(10,10,10,.15);border-top-color:var(--ink)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.scanner-placeholder{background:linear-gradient(160deg,#faeeda,#f5dfb8);border:2px dashed #BA7517;border-radius:14px;padding:36px 20px;margin-bottom:14px;text-align:center}
-.scanner-placeholder .big-ico{font-size:56px;margin-bottom:8px}
-.scanner-placeholder h4{font-size:15px;font-weight:800;color:#8f5a11;margin-bottom:4px}
-.scanner-placeholder p{font-size:12.5px;color:#775;margin-bottom:14px;line-height:1.5}
+/* ===== Scanner ===== */
+.scanner-placeholder{background:var(--bark-l);border:1.5px dashed var(--bark);border-radius:12px;padding:36px 20px;margin-bottom:14px;text-align:center}
+.scanner-placeholder .big-ico{font-size:44px;margin-bottom:10px;color:var(--bark)}
+.scanner-placeholder h4{font-size:13px;font-weight:800;color:var(--bark-d);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase}
+.scanner-placeholder p{font-size:12.5px;color:var(--ink-3);margin-bottom:16px;line-height:1.5}
 
-#scanner-container{display:none;background:#000;border-radius:14px;overflow:hidden;margin-bottom:14px;position:relative;aspect-ratio:1/1;max-height:420px}
+#scanner-container{display:none;background:var(--ink);border-radius:12px;overflow:hidden;margin-bottom:14px;position:relative;aspect-ratio:1/1;max-height:420px}
 #scanner-container.active{display:block}
 #scanner-container video, #scanner-container canvas{width:100%!important;height:100%!important;object-fit:cover}
 #reader{width:100%}
@@ -72,37 +116,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .scanner-controls.active{display:block}
 
 .manual-input{display:flex;gap:8px;margin-bottom:12px}
-.manual-input input{flex:1;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 12px;font-size:14px;background:#fafafa;outline:none;font-family:'Courier New',monospace;text-transform:uppercase}
-.manual-input input:focus{border-color:#BA7517;background:#fff}
-.manual-input button{padding:0 18px;height:44px;background:#BA7517;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+.manual-input input{flex:1;height:44px;border:1px solid var(--line);border-radius:8px;padding:0 12px;font-size:14px;background:var(--paper);outline:none;font-family:'SF Mono','Courier New',monospace;text-transform:uppercase;color:var(--ink)}
+.manual-input input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,.06)}
+.manual-input button{padding:0 20px;height:44px;background:var(--ink);color:var(--paper);border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
 
-.vcr-detail{background:linear-gradient(135deg,#faeeda,#f5dfb8);border:1px solid #e5c99f;border-radius:14px;padding:20px;margin-bottom:14px}
-.vcr-detail .amt{font-size:32px;font-weight:800;color:#8f5a11;text-align:center;margin-bottom:6px}
-.vcr-detail .kode{text-align:center;font-family:'Courier New',monospace;font-size:16px;color:#665;letter-spacing:2px;margin-bottom:14px}
-.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px}
+/* ===== Voucher detail ===== */
+.vcr-detail{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:24px 20px;margin-bottom:14px}
+.vcr-detail .amt{font-size:34px;font-weight:800;color:var(--ink);text-align:center;margin-bottom:8px;letter-spacing:-.02em;font-family:'SF Mono','Courier New',monospace}
+.vcr-detail .kode{text-align:center;font-family:'SF Mono','Courier New',monospace;font-size:14px;color:var(--mute);letter-spacing:3px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line-2)}
+.detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:12.5px}
 .detail-row:last-child{border-bottom:none}
-.detail-row .key{color:#665;font-weight:600}
-.detail-row .val{color:#333;font-weight:700;text-align:right;word-break:break-all;max-width:60%}
-.status-active{color:#0F6E56!important}
-.status-used{color:#c62828!important}
+.detail-row .key{color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.detail-row .val{color:var(--ink);font-weight:600;text-align:right;word-break:break-all;max-width:60%}
+.status-active{color:var(--leaf-d)!important;font-weight:800!important;letter-spacing:.05em!important;text-transform:uppercase}
+.status-used{color:var(--danger)!important;font-weight:800!important;letter-spacing:.05em!important;text-transform:uppercase}
 
-.result-hasil{border-radius:14px;padding:24px;text-align:center;margin-bottom:14px}
-.result-hasil.ok{background:linear-gradient(160deg,#e1f5ee,#c9ebd9);border:2px solid #1D9E75}
-.result-hasil.err{background:#fdecec;border:2px solid #c62828}
-.result-hasil .big{font-size:52px;margin-bottom:10px}
-.result-hasil h3{font-size:18px;font-weight:800}
-.result-hasil.ok h3{color:#0F6E56}
-.result-hasil.err h3{color:#c62828}
-.result-hasil p{font-size:13px;color:#666;margin-top:6px}
+/* ===== Result ===== */
+.result-hasil{border-radius:12px;padding:28px 20px;text-align:center;margin-bottom:14px;border:1px solid var(--line)}
+.result-hasil.ok{background:var(--leaf-l);border-color:#c9dcd0}
+.result-hasil.err{background:var(--danger-bg);border-color:#e8ccc9}
+.result-hasil .big{font-size:44px;margin-bottom:12px}
+.result-hasil h3{font-size:16px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.result-hasil.ok h3{color:var(--leaf-d)}
+.result-hasil.err h3{color:var(--danger)}
+.result-hasil p{font-size:13px;color:var(--ink-3);margin-top:8px;line-height:1.5}
 
+/* ===== Recent used ===== */
 .recent-list{display:flex;flex-direction:column;gap:8px}
-.recent-item{background:#fff;border:1px solid #ececec;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
-.recent-item .ic{font-size:22px}
+.recent-item{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.recent-item .ic{font-size:18px;color:var(--leaf-d)}
 .recent-item .info{flex:1;min-width:0}
-.recent-item .k{font-size:13px;font-weight:700;font-family:'Courier New',monospace}
-.recent-item .t{font-size:11px;color:#aaa;margin-top:1px}
-.recent-item .a{font-size:13px;font-weight:800;color:#BA7517}
-.empty{text-align:center;padding:24px;color:#bbb;font-size:13px}
+.recent-item .k{font-size:12.5px;font-weight:700;font-family:'SF Mono','Courier New',monospace;color:var(--ink);letter-spacing:.03em}
+.recent-item .t{font-size:11px;color:var(--mute-2);margin-top:2px}
+.recent-item .a{font-size:13px;font-weight:800;color:var(--ink);font-family:'SF Mono','Courier New',monospace}
+.empty{text-align:center;padding:24px;color:var(--mute-2);font-size:12.5px}
 </style>
 </head>
 <body>
@@ -111,15 +158,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="auth-bg active" id="page-login">
   <div class="auth-card">
     <div class="logo">
-      <div class="logo-circle">🏪</div>
-      <h1>Revora Merchant</h1>
+      <div class="rv-logo rv-logo-lg">
+        <svg viewBox="0 0 320 356" xmlns="http://www.w3.org/2000/svg">
+          <g fill="currentColor">
+            <rect x="0" y="0" width="72" height="356"/>
+            <path d="M 0 0 L 232 0 C 288 0, 320 44, 320 100 C 320 156, 288 200, 232 200 L 0 200 L 0 140 L 220 140 C 244 140, 258 122, 258 100 C 258 78, 244 60, 220 60 L 0 60 Z"/>
+            <path d="M 152 200 L 232 200 L 320 356 L 236 356 Z"/>
+          </g>
+          <path d="M 20 0 L 100 0 L 20 140 Z" fill="#FFFFFF"/>
+        </svg>
+      </div>
+      <h1>REVORA</h1>
+      <span class="badge">Merchant Portal</span>
       <p>Scan &amp; konfirmasi voucher belanja</p>
     </div>
     <div id="lg-err" class="alert"></div>
     <div class="field"><label>Email</label><input id="lg-email" type="email" placeholder="merchant@contoh.com" autocomplete="username"></div>
     <div class="field"><label>PIN (6 digit)</label><input id="lg-pin" type="password" class="pin-input" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="current-password"></div>
     <button class="btn btn-primary" id="lg-btn" onclick="doLogin()">Masuk</button>
-    <p style="text-align:center;margin-top:16px;font-size:11.5px;color:#bbb">Revora Merchant Portal v6.0</p>
+    <p style="text-align:center;margin-top:18px;font-size:11px;color:var(--mute-2);letter-spacing:.05em">REVORA MERCHANT · v6.0</p>
   </div>
 </div>
 
@@ -127,9 +184,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="app-bg" id="page-scanner">
   <div class="shell">
     <div class="top">
-      <div style="min-width:0">
-        <h1>🏪 <span id="sc-nama">—</span></h1>
-        <p id="sc-email">—</p>
+      <div class="top-brand">
+        <div class="rv-logo rv-logo-sm">
+          <svg viewBox="0 0 320 356" xmlns="http://www.w3.org/2000/svg">
+            <g fill="currentColor"><rect x="0" y="0" width="72" height="356"/><path d="M 0 0 L 232 0 C 288 0, 320 44, 320 100 C 320 156, 288 200, 232 200 L 0 200 L 0 140 L 220 140 C 244 140, 258 122, 258 100 C 258 78, 244 60, 220 60 L 0 60 Z"/><path d="M 152 200 L 232 200 L 320 356 L 236 356 Z"/></g>
+            <path d="M 20 0 L 100 0 L 20 140 Z" fill="#0A0A0A"/>
+          </svg>
+        </div>
+        <div style="min-width:0">
+          <h1 id="sc-nama">—</h1>
+          <p id="sc-email">—</p>
+        </div>
       </div>
       <button class="logout-btn" onclick="doLogout()">Keluar</button>
     </div>
@@ -143,14 +208,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
       <div class="scanner-placeholder" id="sc-placeholder">
         <div class="big-ico">📷</div>
-        <h4>Kamera belum aktif</h4>
+        <h4>Kamera Belum Aktif</h4>
         <p>Klik tombol di bawah untuk membuka kamera dan mulai scan QR voucher pelanggan.</p>
-        <button class="btn btn-primary" id="sc-btn-open" onclick="sc_startScanner()">📷 Buka Kamera</button>
+        <button class="btn btn-bark" id="sc-btn-open" onclick="sc_startScanner()">Buka Kamera</button>
       </div>
 
       <div id="scanner-container"><div id="reader"></div></div>
       <div class="scanner-controls" id="sc-controls">
-        <button class="btn btn-outline" onclick="sc_stopScanner()">✖ Tutup Kamera</button>
+        <button class="btn btn-outline" onclick="sc_stopScanner()">Tutup Kamera</button>
       </div>
 
       <p class="slabel">Atau masukkan kode manual</p>
@@ -159,7 +224,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <button onclick="sc_manualCheck()">Cek</button>
       </div>
 
-      <p class="slabel" style="margin-top:18px">Voucher Baru Dipakai</p>
+      <p class="slabel" style="margin-top:22px">Voucher Baru Dipakai</p>
       <div id="sc-recent"><div class="empty">Belum ada voucher dipakai di sesi ini</div></div>
     </div>
   </div>
@@ -169,8 +234,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="app-bg" id="page-confirm">
   <div class="shell">
     <div class="top">
-      <div><h1>Konfirmasi Voucher</h1><p>Periksa detail sebelum menyetujui</p></div>
-      <button class="logout-btn" onclick="showPage('scanner')">✖ Batal</button>
+      <div><h1>KONFIRMASI VOUCHER</h1><p>Periksa detail sebelum menyetujui</p></div>
+      <button class="logout-btn" onclick="showPage('scanner')">Batal</button>
     </div>
     <div class="content">
       <div id="cf-err" class="alert"></div>
@@ -183,7 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="detail-row" id="cf-dipakai-row" style="display:none"><span class="key">Dipakai</span><span class="val" id="cf-dipakai">—</span></div>
         <div class="detail-row" id="cf-merchant-row" style="display:none"><span class="key">Oleh</span><span class="val" id="cf-merchant">—</span></div>
       </div>
-      <button class="btn btn-success" id="cf-btn-yes" onclick="cf_doConfirm()">✅ Konfirmasi Pemakaian</button>
+      <button class="btn btn-success" id="cf-btn-yes" onclick="cf_doConfirm()">Konfirmasi Pemakaian</button>
       <button class="btn btn-outline" style="margin-top:10px" onclick="showPage('scanner')">Batalkan</button>
     </div>
   </div>
@@ -192,15 +257,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- HASIL -->
 <div class="app-bg" id="page-result">
   <div class="shell">
-    <div class="top"><div><h1>Hasil</h1></div></div>
+    <div class="top"><div><h1>HASIL</h1></div></div>
     <div class="content">
       <div class="result-hasil" id="rs-block">
-        <div class="big" id="rs-icon">✅</div>
+        <div class="big" id="rs-icon">✓</div>
         <h3 id="rs-title">—</h3>
         <p id="rs-msg">—</p>
-        <div style="margin-top:14px;font-family:'Courier New',monospace;font-size:14px;font-weight:700;color:#333;background:rgba(255,255,255,.6);border-radius:8px;padding:8px" id="rs-kode-box">—</div>
+        <div style="margin-top:16px;font-family:'SF Mono','Courier New',monospace;font-size:13px;font-weight:700;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px;letter-spacing:.05em" id="rs-kode-box">—</div>
       </div>
-      <button class="btn btn-primary" onclick="showPage('scanner')">📷 Scan Voucher Berikutnya</button>
+      <button class="btn btn-bark" onclick="showPage('scanner')">Scan Voucher Berikutnya</button>
     </div>
   </div>
 </div>
@@ -406,13 +471,13 @@ function cf_render(v) {
   var btnYes   = document.getElementById('cf-btn-yes');
 
   if (v.status === 'aktif') {
-    statusEl.textContent = '✅ AKTIF';
+    statusEl.textContent = 'Aktif';
     statusEl.className = 'val status-active';
     btnYes.style.display = '';
     document.getElementById('cf-dipakai-row').style.display  = 'none';
     document.getElementById('cf-merchant-row').style.display = 'none';
   } else {
-    statusEl.textContent = '✖ SUDAH DIPAKAI';
+    statusEl.textContent = 'Sudah Dipakai';
     statusEl.className = 'val status-used';
     btnYes.style.display = 'none';
     document.getElementById('cf-dipakai-row').style.display  = 'flex';
@@ -452,7 +517,7 @@ async function cf_doConfirm() {
 function rs_show(ok, title, msg, kode) {
   var block = document.getElementById('rs-block');
   block.className = 'result-hasil ' + (ok ? 'ok' : 'err');
-  document.getElementById('rs-icon').textContent  = ok ? '✅' : '❌';
+  document.getElementById('rs-icon').textContent  = ok ? '✓' : '✕';
   document.getElementById('rs-title').textContent = title;
   document.getElementById('rs-msg').textContent   = msg;
   document.getElementById('rs-kode-box').textContent = kode || '';

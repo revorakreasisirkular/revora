@@ -26,6 +26,5 @@ const SH = {
   VOUCHER_REDEEMED : 'VoucherRedeemed',
   CONFIG           : 'Config',
   DEVICES          : 'Devices',
-  KARTU            : 'Kartu',
   MERCHANTS        : 'Merchants',
 };

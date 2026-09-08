@@ -46,8 +46,6 @@ function initSpreadsheet() {
     ]);
   }
 
-  _ensureSheet(ss, SH.KARTU, ['CardUID', 'UserID', 'Email', 'Tgl Daftar']);
-
   const shM = _ensureSheet(ss, SH.MERCHANTS,
     ['MerchantID', 'Nama Toko', 'Email', 'PIN', 'Alamat', 'Status', 'Tgl Daftar']);
   if (shM.getLastRow() <= 1) {
@@ -59,7 +57,7 @@ function initSpreadsheet() {
   }
 
   Logger.log('Spreadsheet berhasil diinisialisasi.');
-  Logger.log('Sheets dibuat: Users, TransaksiBotol, TransaksiVoucher, VoucherRedeemed, Config, Devices, Kartu, Merchants');
+  Logger.log('Sheets dibuat: Users, TransaksiBotol, TransaksiVoucher, VoucherRedeemed, Config, Devices, Merchants');
   Logger.log('Device pertama otomatis dibuat — cek sheet Devices untuk DeviceID & Secret-nya.');
   Logger.log('Merchant demo: merchant@demo.com / PIN 123456 — segera ganti PIN dari sheet Merchants.');
 }

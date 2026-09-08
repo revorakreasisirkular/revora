@@ -54,7 +54,7 @@ gh repo create revora --public --source=. --push
 1. Di editor Apps Script, dropdown fungsi (atas) → pilih **`initSpreadsheet`**
 2. Klik **▶ Run** → Allow permissions saat diminta
 3. Cek log → 8 sheet dibuat otomatis. Buka Spreadsheet-nya untuk verifikasi.
-4. Cek sheet `Devices` — device pertama (`BIN-001`) sudah ada dengan Secret acak. Catat Secret ini kalau kamu akan pakai Raspberry Pi.
+4. Cek sheet `Devices` — device pertama (`BIN-001`) sudah ada dengan Secret acak. Catat Secret ini — nanti dipakai untuk konfigurasi alat ESP32.
 
 ### 2.4. Deploy sebagai Web App
 1. **Deploy → New deployment**
@@ -169,39 +169,31 @@ Untuk merchant, kamu bisa pakai variasi warna berbeda (misal oranye) supaya beda
 
 ---
 
-## Langkah 7 — Setup Raspberry Pi (opsional)
+## Langkah 7 — Alat ESP32 (dikerjakan tim hardware)
 
-Untuk device fisik pengumpul botol. Kalau belum punya hardware, skip langkah ini — data botol tetap bisa diinput manual di sheet `TransaksiBotol` untuk testing.
+Alat pengumpul botol berbasis ESP32 dikerjakan tim hardware terpisah. Kasih mereka:
 
-Lihat `raspberry_pi/input_device.py` — edit konfigurasi:
+1. Dokumentasi API endpoint: `docs/API_ESP32.md`
+2. `DEVICE_ID` + `Secret` dari sheet `Devices` (baris `BIN-001` yang dibuat otomatis saat init)
+3. URL API proxy: `https://revora-api.vercel.app/api/rpc`
 
-```python
-API_URL = "https://revora-api.vercel.app/api/rpc"
-DEVICE_ID     = "BIN-001"
-DEVICE_SECRET = "..."   # dari sheet Devices di spreadsheet
-```
+Kalau butuh device tambahan (untuk lokasi berbeda), tambah baris manual di sheet `Devices` dengan `DeviceID` baru (misal `BIN-002`) dan Secret acak.
 
-Lalu jalankan di Pi:
-```bash
-pip3 install requests mfrc522 spidev --break-system-packages
-python3 input_device.py
-```
-
-Alur: tap RFID → identify_card → sesi terbuka → sensor hitung botol → sesi ditutup → kirim total.
+Sambil menunggu alat siap, data botol tetap bisa dimasukkan manual ke sheet `TransaksiBotol` untuk testing.
 
 ---
 
 ## Update aplikasi setelah live
 
 - **Edit HTML/CSS/JS di apps/user atau apps/merchant** → commit → push → Vercel auto-redeploy
-- **Edit Code.gs** → paste ulang ke Apps Script editor → **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**
-  - PENTING: setiap perubahan Code.gs WAJIB "New version", kalau tidak endpoint lama yang tetap dipakai
+- **Edit file `.gs`** → paste ulang ke Apps Script editor → **Deploy → Manage deployments → ✏️ → Version: New version → Deploy**
+  - PENTING: setiap perubahan file `.gs` WAJIB "New version", kalau tidak endpoint lama yang tetap dipakai
   - URL `/exec` tidak berubah, jadi tidak perlu update env Vercel
 - **Rotasi shared secret** (kalau curiga bocor):
   1. Generate secret baru
-  2. Update `APP_SHARED_SECRET` di Code.gs → Deploy new version
+  2. Update `APP_SHARED_SECRET` di `gas/00_Config.gs` → Deploy new version
   3. Update `APP_SECRET` di Vercel project `revora-api` → Redeploy
-  4. Kalau pakai Raspberry Pi mode B (direct GAS), update `APP_SECRET` di device juga
+  4. ESP32 tidak terpengaruh (device tidak simpan `APP_SHARED_SECRET` — cuma proxy Vercel yang tahu)
 
 ---
 

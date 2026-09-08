@@ -3,152 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1D9E75">
-<title>Revora Bottle Save — Bank Sampah Botol Plastik</title>
+<meta name="theme-color" content="#0A0A0A">
+<title>REVORA — Bank Sampah Botol Plastik</title>
 
 <!-- PWA -->
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/logo-mark.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Revora">
+<meta name="apple-mobile-web-app-title" content="REVORA">
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
+/* ============================================================
+   REVORA — DESIGN TOKENS
+   Palette: Ink (#0A0A0A) + Bone (#F5F5F0) + Paper (#FFFFFF)
+            + Leaf (#4A7C59) sebagai aksen brand
+   Typography: system sans-serif, weight 400/600/700/800
+============================================================ */
+:root{
+  --ink:#0A0A0A;
+  --ink-2:#1a1a1a;
+  --ink-3:#3a3a3a;
+  --bone:#F5F5F0;
+  --paper:#FFFFFF;
+  --line:#e6e6df;
+  --line-2:#efefe8;
+  --mute:#8a8a80;
+  --mute-2:#b8b8ac;
+  --leaf:#4A7C59;
+  --leaf-d:#385F44;
+  --leaf-l:#EBF1ED;
+  --danger:#B23A3A;
+  --danger-bg:#F9EBEB;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f2f4f2;min-height:100vh;color:#111}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;background:var(--bone);min-height:100vh;color:var(--ink);-webkit-font-smoothing:antialiased}
+
+/* ===== Logo mark component (inline SVG) ===== */
+.rv-logo{display:inline-block;color:var(--ink);line-height:0}
+.rv-logo svg{display:block;width:100%;height:100%}
+.rv-logo-sm{width:24px;height:26px}
+.rv-logo-md{width:40px;height:44px}
+.rv-logo-lg{width:72px;height:80px}
+.rv-wordmark{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:800;letter-spacing:.08em;font-size:22px;color:var(--ink)}
 
 /* ===== Auth pages (login/register) ===== */
-.auth-bg{display:none;min-height:100vh;background:linear-gradient(160deg,#0F6E56 0%,#1D9E75 45%,#3DBB95 100%);align-items:center;justify-content:center;padding:20px}
+.auth-bg{display:none;min-height:100vh;background:var(--bone);align-items:center;justify-content:center;padding:20px}
 .auth-bg.active{display:flex}
-.auth-card{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:32px 26px;box-shadow:0 20px 50px rgba(0,60,40,.25)}
-.logo{text-align:center;margin-bottom:28px}
-.logo-circle{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1D9E75,#0F6E56);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px;box-shadow:0 8px 20px rgba(29,158,117,.35)}
-.logo h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
-.logo p{font-size:13px;color:#888;margin-top:3px}
-.divider{display:flex;align-items:center;gap:10px;margin:20px 0 6px}
-.divider hr{flex:1;border:none;border-top:1px solid #eee}
-.divider span{font-size:12px;color:#aaa}
+.auth-card{width:100%;max-width:400px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:36px 28px}
+.logo{text-align:center;margin-bottom:28px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.logo .rv-logo-lg{color:var(--ink)}
+.logo h1{font-size:24px;font-weight:800;letter-spacing:.1em;color:var(--ink)}
+.logo p{font-size:12.5px;color:var(--mute);margin-top:-2px;letter-spacing:.02em}
+.divider{display:flex;align-items:center;gap:10px;margin:22px 0 8px}
+.divider hr{flex:1;border:none;border-top:1px solid var(--line)}
+.divider span{font-size:11px;color:var(--mute-2);text-transform:uppercase;letter-spacing:.08em}
 
 /* ===== App pages ===== */
-.app-bg{display:none;min-height:100vh}
+.app-bg{display:none;min-height:100vh;background:var(--bone)}
 .app-bg.active{display:block}
-.shell{max-width:440px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,.05)}
-.top{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;padding:16px 20px}
+.shell{max-width:440px;margin:0 auto;min-height:100vh;background:var(--paper);display:flex;flex-direction:column;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.top{background:var(--ink);color:var(--paper);padding:16px 20px}
 .top.tall{padding:18px 20px 22px}
 .top-row{display:flex;justify-content:space-between;align-items:center}
 .top-back-row{display:flex;align-items:center;gap:12px}
-.back{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;line-height:1;width:34px;height:34px;border-radius:9px;flex-shrink:0}
-.top h1{font-size:17px;font-weight:800}
-.top.tall h1{font-size:18px}
-.top p{font-size:12px;opacity:.82;margin-top:2px}
-.logout-btn,.edit-btn{background:rgba(255,255,255,.18);border:none;color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600}
+.back{background:rgba(255,255,255,.12);border:none;color:var(--paper);font-size:16px;cursor:pointer;line-height:1;width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.top h1{font-size:16px;font-weight:800;letter-spacing:.06em}
+.top.tall h1{font-size:18px;letter-spacing:.06em}
+.top p{font-size:12px;opacity:.7;margin-top:2px;letter-spacing:.02em}
+.top .rv-logo{color:var(--paper)}
+.top-brand{display:flex;align-items:center;gap:10px}
+.logout-btn,.edit-btn{background:rgba(255,255,255,.12);border:none;color:var(--paper);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.logout-btn:hover,.edit-btn:hover{background:rgba(255,255,255,.2)}
 .content{padding:20px;flex:1;overflow-y:auto}
-.nav{display:flex;background:#fff;border-top:1px solid #eee;padding:9px 0 11px;flex-shrink:0}
+.nav{display:flex;background:var(--paper);border-top:1px solid var(--line);padding:9px 0 11px;flex-shrink:0}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;padding:4px 0}
-.ni span{font-size:10px;color:#aaa;font-weight:600}
-.ni.a span,.ni.a em{color:#1D9E75}
-.ni em{font-size:21px;color:#ccc;font-style:normal}
+.ni span{font-size:10px;color:var(--mute-2);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.ni em{font-size:20px;color:var(--mute-2);font-style:normal;line-height:1}
+.ni.a span,.ni.a em{color:var(--ink)}
+.ni.a{position:relative}
+.ni.a::before{content:"";position:absolute;top:-9px;left:20%;right:20%;height:2px;background:var(--ink)}
 
 /* ===== Shared components ===== */
 .field{margin-bottom:14px}
-.field label{display:block;font-size:12.5px;font-weight:600;color:#555;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
-.field input{width:100%;height:44px;border:1.5px solid #e5e5e5;border-radius:10px;padding:0 14px;font-size:15px;color:#111;background:#fafafa;outline:none;transition:.15s}
-.field input:focus{border-color:#1D9E75;background:#fff;box-shadow:0 0 0 3px rgba(29,158,117,.12)}
-.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'Courier New',monospace;font-size:20px!important;font-weight:800!important}
-.btn{width:100%;height:46px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{transform:scale(.98)}
-.btn-primary{background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;box-shadow:0 6px 16px rgba(29,158,117,.3)}
-.btn-primary:disabled{opacity:.6;cursor:default}
-.btn-outline{background:#fff;border:1.5px solid #1D9E75;color:#1D9E75}
-.alert{border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:#fdecec;color:#c62828;border:1px solid #f6c8c8}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--ink-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.field input{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font-size:15px;color:var(--ink);background:var(--paper);outline:none;transition:border-color .15s,box-shadow .15s;font-family:inherit}
+.field input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,.06)}
+.pin-input{letter-spacing:.4em!important;text-align:center;font-family:'SF Mono','Courier New',monospace;font-size:20px!important;font-weight:700!important}
+
+.btn{width:100%;height:48px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .05s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.04em;text-transform:uppercase;font-family:inherit}
+.btn:active{transform:scale(.985)}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:var(--ink-2)}
+.btn-primary:disabled{opacity:.55;cursor:default}
+.btn-outline{background:var(--paper);border:1px solid var(--ink);color:var(--ink)}
+.btn-outline:hover{background:var(--bone)}
+.btn-leaf{background:var(--leaf);color:var(--paper)}
+.btn-leaf:hover{background:var(--leaf-d)}
+
+.alert{border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:14px;display:none;background:var(--danger-bg);color:var(--danger);border:1px solid #f0d5d5}
 .alert.show{display:block}
-.alert-ok{background:#e1f5ee;color:#0a6644;border-color:#b8e3d1}
-.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+.alert-ok{background:var(--leaf-l);color:var(--leaf-d);border-color:#d3e2d7}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--paper);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto}
+.btn-outline .spinner{border-color:rgba(10,10,10,.15);border-top-color:var(--ink)}
 @keyframes spin{to{transform:rotate(360deg)}}
-.card{background:#fff;border:1px solid #ececec;border-radius:14px;padding:16px}
-.slabel{font-size:11px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px}
-.empty{text-align:center;padding:32px 20px;color:#bbb;font-size:14px}
-.foot{text-align:center;margin-top:20px;font-size:11.5px;color:#bbb}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px}
+.slabel{font-size:10.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.empty{text-align:center;padding:32px 20px;color:var(--mute-2);font-size:13px}
+.foot{text-align:center;margin-top:22px;font-size:11px;color:var(--mute-2);letter-spacing:.05em}
 
 /* ===== Register steps ===== */
-.rg-h1{text-align:center;font-size:21px;font-weight:800}
-.rg-sub{text-align:center;color:#888;font-size:13px;margin-top:4px;margin-bottom:20px}
-.steps{display:flex;gap:6px;margin-bottom:22px}
-.step{flex:1;height:4px;border-radius:4px;background:#eee;transition:background .3s}
-.step.done{background:#1D9E75}
+.rg-h1{text-align:center;font-size:22px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.rg-sub{text-align:center;color:var(--mute);font-size:12.5px;margin-top:4px;margin-bottom:22px;letter-spacing:.02em}
+.steps{display:flex;gap:5px;margin-bottom:22px}
+.step{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .3s}
+.step.done{background:var(--ink)}
 .row{display:flex;gap:10px;margin-top:18px}
 .row .btn-primary{flex:1}
 .row .btn-outline{width:52px;flex-shrink:0}
 .ok-block{text-align:center;display:none}
 .ok-block.show{display:block}
-.ok-block .ic{font-size:52px;margin-bottom:10px}
-.ok-block h3{font-size:19px;font-weight:800;color:#0F6E56}
-.ok-block p{font-size:13px;color:#666;margin-top:6px}
-.uid-box{font-size:20px;font-weight:800;color:#1D9E75;border:2px dashed #1D9E75;border-radius:12px;padding:14px;margin:14px 0;letter-spacing:1px;background:#f0faf6;font-family:'Courier New',monospace}
-.link{text-align:center;margin-top:18px;font-size:13px;color:#666}
-.link a{color:#1D9E75;text-decoration:none;font-weight:700;cursor:pointer}
+.ok-block .ic{font-size:44px;margin-bottom:14px;color:var(--leaf)}
+.ok-block h3{font-size:20px;font-weight:800;color:var(--ink);letter-spacing:.04em;text-transform:uppercase}
+.ok-block p{font-size:13px;color:var(--mute);margin-top:8px;line-height:1.5}
+.uid-box{font-size:19px;font-weight:700;color:var(--ink);border:1.5px dashed var(--ink);border-radius:8px;padding:14px;margin:16px 0;letter-spacing:2px;background:var(--bone);font-family:'SF Mono','Courier New',monospace}
+.link{text-align:center;margin-top:18px;font-size:13px;color:var(--mute)}
+.link a{color:var(--ink);text-decoration:none;font-weight:700;cursor:pointer;border-bottom:1px solid var(--ink)}
 
 /* ===== Home ===== */
-.hero{background:rgba(255,255,255,.15);border-radius:14px;padding:15px 16px;margin-top:16px;display:flex;align-items:center;gap:13px}
-.ava{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0}
-.hero-name{font-size:15.5px;font-weight:700;color:#fff}
-.hero-email{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:2px;word-break:break-all}
-.pills{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
-.pill{background:rgba(255,255,255,.22);border-radius:20px;padding:4px 11px;font-size:12px;color:#fff;font-weight:600}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:22px}
-.mcard{background:#fff;border:1px solid #ececec;border-radius:14px;padding:14px 10px;text-decoration:none;color:#222;display:flex;flex-direction:column;align-items:center;gap:8px;transition:.15s;cursor:pointer;text-align:center}
-.mcard:active{transform:scale(.97);background:#f7f9f7}
-.micon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
-.ia{background:#faeeda}.ib{background:#e6f1fb}.ic{background:#faece7}
-.mname{font-size:13px;font-weight:700}
-.acard{border:1px solid #ececec;border-radius:14px;overflow:hidden}
-.arow{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid #f4f4f4}
+.hero{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px 15px;margin-top:16px;display:flex;align-items:center;gap:13px}
+.ava{width:46px;height:46px;border-radius:50%;background:var(--paper);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;letter-spacing:.02em}
+.hero-name{font-size:15px;font-weight:700;color:var(--paper);letter-spacing:.02em}
+.hero-email{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:2px;word-break:break-all;font-family:'SF Mono','Courier New',monospace;letter-spacing:.05em}
+.pills{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.14);border-radius:4px;padding:4px 10px;font-size:11px;color:var(--paper);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.pill.leaf{background:var(--leaf)}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px}
+.mcard{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 10px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:10px;transition:border-color .15s,transform .05s;cursor:pointer;text-align:center}
+.mcard:hover{border-color:var(--ink)}
+.mcard:active{transform:scale(.97)}
+.micon{width:38px;height:38px;border-radius:8px;background:var(--bone);display:flex;align-items:center;justify-content:center;font-size:18px}
+.mname{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.acard{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+.arow{display:flex;align-items:center;gap:11px;padding:13px 14px;border-bottom:1px solid var(--line-2)}
 .arow:last-child{border-bottom:none}
-.aico{width:34px;height:34px;border-radius:9px;background:#e1f5ee;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.aico.r{background:#faeeda}
-.aico.u{background:#f0f0f0}
-.atitle{font-size:13px;font-weight:600}
-.adate{font-size:11px;color:#aaa;margin-top:1px}
-.apoin{font-size:13px;font-weight:800;color:#1D9E75;flex-shrink:0}
-.apoin.m{color:#BA7517}
+.aico{width:32px;height:32px;border-radius:6px;background:var(--leaf-l);color:var(--leaf-d);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.aico.r{background:var(--bone);color:var(--ink)}
+.aico.u{background:var(--line-2);color:var(--ink-3)}
+.atitle{font-size:13px;font-weight:600;color:var(--ink)}
+.adate{font-size:11px;color:var(--mute-2);margin-top:1px;font-family:'SF Mono','Courier New',monospace;letter-spacing:.03em}
+.apoin{font-size:13px;font-weight:700;color:var(--leaf-d);flex-shrink:0;font-family:'SF Mono','Courier New',monospace}
+.apoin.m{color:var(--ink-3)}
 
 /* ===== Riwayat ===== */
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
-.sbox{background:#fff;border:1px solid #ececec;border-radius:12px;padding:13px;text-align:center}
-.sbox .val{font-size:22px;font-weight:800;color:#1D9E75}
-.sbox .lbl{font-size:11px;color:#888;margin-top:3px;font-weight:600}
-.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-.fb{padding:7px 15px;border-radius:20px;border:1.5px solid #e5e5e5;background:none;font-size:13px;cursor:pointer;color:#666;font-weight:600}
-.fb.a{background:#1D9E75;color:#fff;border-color:#1D9E75}
-.mgroup{margin-bottom:16px}
-.mlabel{font-size:11px;font-weight:800;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.sbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+.sbox .val{font-size:24px;font-weight:800;color:var(--ink);font-family:'SF Mono','Courier New',monospace;letter-spacing:-.01em}
+.sbox .lbl{font-size:10.5px;color:var(--mute);margin-top:4px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.filters{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+.fb{padding:7px 13px;border-radius:6px;border:1px solid var(--line);background:var(--paper);font-size:11.5px;cursor:pointer;color:var(--mute);font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-family:inherit}
+.fb.a{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.mgroup{margin-bottom:18px}
+.mlabel{font-size:10.5px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
 
 /* ===== Voucher QR modal ===== */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:99}
+.overlay{position:fixed;inset:0;background:rgba(10,10,10,.55);display:none;align-items:flex-end;z-index:99;backdrop-filter:blur(4px)}
 .overlay.open{display:flex}
-.sheet{background:#fff;width:100%;max-width:440px;margin:0 auto;border-radius:18px 18px 0 0;padding:22px}
-.handle{width:40px;height:4px;background:#eee;border-radius:4px;margin:0 auto 16px}
+.sheet{background:var(--paper);width:100%;max-width:440px;margin:0 auto;border-radius:16px 16px 0 0;padding:24px}
+.handle{width:36px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 18px}
 
 /* ===== Profil ===== */
-.ava-block{text-align:center;margin-bottom:20px}
-.ava-lg{width:72px;height:72px;border-radius:50%;background:#e1f5ee;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:27px;font-weight:800;color:#1D9E75;border:3px solid #1D9E75}
-.ava-name{font-size:19px;font-weight:800}
-.ava-email{font-size:13px;color:#888;margin-top:2px;word-break:break-all}
-.ava-since{font-size:12px;color:#aaa;margin-top:2px}
-.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:20px}
-.irow{display:flex;align-items:center;gap:11px;padding:14px 0;border-bottom:1px solid #f5f5f5}
+.ava-block{text-align:center;margin-bottom:22px}
+.ava-lg{width:76px;height:76px;border-radius:50%;background:var(--bone);color:var(--ink);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px;font-weight:800;border:1.5px solid var(--ink);letter-spacing:.02em}
+.ava-name{font-size:20px;font-weight:800;letter-spacing:.02em}
+.ava-email{font-size:12px;color:var(--mute);margin-top:4px;word-break:break-all;font-family:'SF Mono','Courier New',monospace;letter-spacing:.03em}
+.ava-since{font-size:11px;color:var(--mute-2);margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
+.sgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px}
+.irow{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-2)}
 .irow:last-child{border-bottom:none}
-.iico{font-size:17px;color:#aaa;width:20px;flex-shrink:0}
-.ikey{font-size:12px;color:#aaa;font-weight:600}
-.ival{font-size:14px;font-weight:600;margin-top:1px;word-break:break-all}
-.action-list{display:flex;flex-direction:column;gap:9px}
-.alink{display:flex;align-items:center;gap:12px;padding:14px 15px;background:#fff;border:1px solid #ececec;border-radius:12px;cursor:pointer;font-size:14px;color:#222;text-decoration:none;font-weight:600}
-.alink:active{background:#f7f9f7}
-.alink.red{color:#c62828;border-color:#fadada}
-.alink .arr{margin-left:auto;color:#ccc;font-size:18px}
-.alink.red .arr{color:#f0aaaa}
+.iico{font-size:16px;color:var(--mute);width:20px;flex-shrink:0}
+.ikey{font-size:10.5px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ival{font-size:14px;font-weight:600;margin-top:2px;word-break:break-all;color:var(--ink)}
+.action-list{display:flex;flex-direction:column;gap:8px}
+.alink{display:flex;align-items:center;gap:12px;padding:14px 15px;background:var(--paper);border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--ink);text-decoration:none;font-weight:600;letter-spacing:.02em}
+.alink:hover{border-color:var(--ink)}
+.alink:active{background:var(--bone)}
+.alink.red{color:var(--danger);border-color:#e8ccc9}
+.alink.red:hover{border-color:var(--danger)}
+.alink .arr{margin-left:auto;color:var(--mute-2);font-size:16px}
+.alink.red .arr{color:#d99c98}
 </style>
 </head>
 <body>
@@ -159,8 +205,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div class="auth-bg active" id="page-login">
   <div class="auth-card">
     <div class="logo">
-      <div class="logo-circle">🌿</div>
-      <h1>Revora</h1>
+      <div class="rv-logo rv-logo-lg">
+        <svg viewBox="0 0 320 356" xmlns="http://www.w3.org/2000/svg">
+          <g fill="currentColor">
+            <rect x="0" y="0" width="72" height="356"/>
+            <path d="M 0 0 L 232 0 C 288 0, 320 44, 320 100 C 320 156, 288 200, 232 200 L 0 200 L 0 140 L 220 140 C 244 140, 258 122, 258 100 C 258 78, 244 60, 220 60 L 0 60 Z"/>
+            <path d="M 152 200 L 232 200 L 320 356 L 236 356 Z"/>
+          </g>
+          <path d="M 20 0 L 100 0 L 20 140 Z" fill="#FFFFFF"/>
+        </svg>
+      </div>
+      <h1>REVORA</h1>
       <p>Bank Sampah Botol Plastik</p>
     </div>
     <div id="lg-err" class="alert"></div>
@@ -169,7 +224,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <button class="btn btn-primary" id="lg-btn" onclick="doLogin()">Masuk</button>
     <div class="divider"><hr><span>atau</span><hr></div>
     <button class="btn btn-outline" onclick="showPage('register')">Daftar Akun Baru</button>
-    <p class="foot">Revora Bottle Save v6.0</p>
+    <p class="foot">REVORA BOTTLE SAVE · v6.0</p>
   </div>
 </div>
 
@@ -178,8 +233,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- ============================================================ -->
 <div class="auth-bg" id="page-register">
   <div class="auth-card">
-    <h1 class="rg-h1">Daftar Akun Baru</h1>
-    <p class="rg-sub">Revora — Bank Sampah</p>
+    <h1 class="rg-h1">DAFTAR AKUN BARU</h1>
+    <p class="rg-sub">REVORA — Bank Sampah</p>
     <div class="steps"><div class="step done" id="rg-s1"></div><div class="step" id="rg-s2"></div><div class="step" id="rg-s3"></div></div>
     <div id="rg-err" class="alert"></div>
 
@@ -219,7 +274,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="shell">
     <div class="top tall">
       <div class="top-row">
-        <div><h1>🌿 Revora</h1><p>Bank Sampah Botol Plastik</p></div>
+        <div class="top-brand">
+          <div class="rv-logo rv-logo-sm">
+            <svg viewBox="0 0 320 356" xmlns="http://www.w3.org/2000/svg">
+              <g fill="currentColor"><rect x="0" y="0" width="72" height="356"/><path d="M 0 0 L 232 0 C 288 0, 320 44, 320 100 C 320 156, 288 200, 232 200 L 0 200 L 0 140 L 220 140 C 244 140, 258 122, 258 100 C 258 78, 244 60, 220 60 L 0 60 Z"/><path d="M 152 200 L 232 200 L 320 356 L 236 356 Z"/></g>
+              <path d="M 20 0 L 100 0 L 20 140 Z" fill="#0A0A0A"/>
+            </svg>
+          </div>
+          <div><h1>REVORA</h1><p>Bank Sampah Botol Plastik</p></div>
+        </div>
         <button class="logout-btn" onclick="doLogout()">Keluar</button>
       </div>
       <div class="hero">
@@ -228,8 +291,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <div class="hero-name" id="hm-nama">—</div>
           <div class="hero-email" id="hm-hp">—</div>
           <div class="pills">
-            <span class="pill">🪙 <span id="hm-poin">0</span> poin</span>
-            <span class="pill">🍶 <span id="hm-botol">0</span> botol</span>
+            <span class="pill leaf"><span id="hm-poin">0</span> POIN</span>
+            <span class="pill"><span id="hm-botol">0</span> BOTOL</span>
           </div>
         </div>
       </div>
@@ -238,13 +301,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <p class="slabel">Menu</p>
       <div class="grid">
         <div class="mcard" onclick="showPage('redeem')">
-          <div class="micon ia">🎟️</div><div class="mname">Voucher</div>
+          <div class="micon">🎟️</div><div class="mname">Voucher</div>
         </div>
         <div class="mcard" onclick="showPage('riwayat')">
-          <div class="micon ib">📋</div><div class="mname">Riwayat</div>
+          <div class="micon">📋</div><div class="mname">Riwayat</div>
         </div>
         <div class="mcard" onclick="showPage('profil')">
-          <div class="micon ic">👤</div><div class="mname">Profil</div>
+          <div class="micon">👤</div><div class="mname">Profil</div>
         </div>
       </div>
       <p class="slabel">Aktivitas Terakhir</p>
@@ -267,31 +330,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="top">
       <div class="top-back-row">
         <button class="back" onclick="showPage('home')">←</button>
-        <div><h1>Voucher</h1><p>Tukar poinmu jadi voucher belanja</p></div>
+        <div><h1>VOUCHER</h1><p>Tukar poinmu jadi voucher belanja</p></div>
       </div>
     </div>
     <div class="content">
-      <div class="card" style="background:linear-gradient(135deg,#1D9E75,#0F6E56);color:#fff;border:none;padding:18px;margin-bottom:18px;box-shadow:0 6px 16px rgba(29,158,117,.25)">
-        <div style="font-size:12px;opacity:.85">Poin kamu</div>
-        <div style="font-size:28px;font-weight:800;margin-top:4px" id="rd-poin">—</div>
-        <div style="font-size:12px;opacity:.75;margin-top:2px" id="rd-botol">— botol</div>
+      <div class="card" style="background:var(--ink);color:var(--paper);border:none;padding:20px;margin-bottom:18px">
+        <div style="font-size:10.5px;opacity:.6;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Poin Kamu</div>
+        <div style="font-size:32px;font-weight:800;margin-top:6px;font-family:'SF Mono','Courier New',monospace;letter-spacing:-.02em" id="rd-poin">—</div>
+        <div style="font-size:11.5px;opacity:.55;margin-top:4px;letter-spacing:.02em" id="rd-botol">— botol dikumpulkan</div>
       </div>
 
       <div class="alert" id="rd-err"></div>
 
       <p class="slabel">Tukar Poin</p>
-      <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#faeeda,#f5dfb8);border:1px solid #e5c99f">
-        <div style="display:flex;align-items:center;gap:14px">
-          <div style="font-size:44px">🎟️</div>
-          <div style="flex:1">
-            <div style="font-size:19px;font-weight:800;color:#8f5a11">Voucher Rp 10.000</div>
-            <div style="font-size:13px;color:#665;margin-top:2px">Berlaku di merchant Revora</div>
-            <div style="margin-top:8px;font-size:13px;color:#444;font-weight:600">🪙 100 poin per voucher</div>
+      <div class="card" style="margin-bottom:22px;padding:0;overflow:hidden">
+        <div style="padding:20px;border-bottom:1px solid var(--line)">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:36px;line-height:1">🎟️</div>
+            <div style="flex:1">
+              <div style="font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:4px">Voucher Belanja</div>
+              <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.01em">Rp 10.000</div>
+              <div style="font-size:12px;color:var(--mute);margin-top:4px">Berlaku di seluruh merchant partner REVORA</div>
+            </div>
           </div>
         </div>
-        <button class="btn btn-primary" id="rd-btn-redeem" onclick="rdDoRedeem()" style="margin-top:14px;background:linear-gradient(135deg,#BA7517,#8f5a11);box-shadow:0 6px 16px rgba(186,117,23,.3)">
-          ✨ Tukar Sekarang
-        </button>
+        <div style="padding:14px 20px;background:var(--bone);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;color:var(--ink-3);font-weight:600">Butuh <span style="color:var(--leaf);font-weight:800">100 POIN</span></div>
+        </div>
+        <div style="padding:16px 20px">
+          <button class="btn btn-leaf" id="rd-btn-redeem" onclick="rdDoRedeem()">Tukar Sekarang</button>
+        </div>
       </div>
 
       <p class="slabel">Voucher Saya</p>
@@ -307,18 +375,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <div class="overlay" id="rd-qr-overlay" onclick="rdCloseQR(event)">
-  <div class="sheet" style="border-radius:18px;max-width:400px">
+  <div class="sheet" style="border-radius:16px 16px 0 0;max-width:400px">
     <div class="handle"></div>
-    <h3 style="font-size:17px;font-weight:800;text-align:center">🎟️ Voucher Rp 10.000</h3>
-    <p style="font-size:13px;color:#666;text-align:center;margin-top:2px">Tunjukkan QR ini ke kasir merchant</p>
-    <div style="background:#fff;border:1.5px solid #eee;border-radius:12px;padding:14px;margin:14px 0;display:flex;justify-content:center;align-items:center;min-height:220px">
+    <div style="text-align:center;margin-bottom:4px">
+      <div style="font-size:10.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;font-weight:700">Voucher Belanja</div>
+      <h3 style="font-size:24px;font-weight:800;margin-top:6px;letter-spacing:-.01em">Rp 10.000</h3>
+    </div>
+    <p style="font-size:12px;color:var(--mute);text-align:center;margin-top:4px">Tunjukkan QR ini ke kasir merchant</p>
+    <div style="background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0;display:flex;justify-content:center;align-items:center;min-height:220px">
       <div id="rd-qr-canvas"></div>
     </div>
-    <div style="text-align:center;margin-bottom:10px">
-      <div style="font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:.05em;font-weight:700">Kode Voucher</div>
-      <div id="rd-qr-kode" style="font-size:22px;font-weight:800;color:#1D9E75;letter-spacing:2px;margin-top:4px;font-family:'Courier New',monospace">—</div>
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.1em;font-weight:700">Kode Voucher</div>
+      <div id="rd-qr-kode" style="font-size:20px;font-weight:800;color:var(--ink);letter-spacing:3px;margin-top:6px;font-family:'SF Mono','Courier New',monospace">—</div>
     </div>
-    <div id="rd-qr-status" style="text-align:center;padding:8px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:12px">—</div>
+    <div id="rd-qr-status" style="text-align:center;padding:10px;border-radius:8px;font-size:12px;font-weight:700;margin-bottom:14px;letter-spacing:.04em;text-transform:uppercase">—</div>
     <button class="btn btn-outline" onclick="rdCloseQR()">Tutup</button>
   </div>
 </div>
@@ -331,13 +402,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="top">
       <div class="top-back-row">
         <button class="back" onclick="showPage('home')">←</button>
-        <div><h1>Riwayat Aktivitas</h1></div>
+        <div><h1>RIWAYAT AKTIVITAS</h1></div>
       </div>
     </div>
     <div class="content">
       <div class="stats">
-        <div class="sbox"><div class="val" id="rw-botol">—</div><div class="lbl">🍶 Total Botol</div></div>
-        <div class="sbox"><div class="val" id="rw-poin">—</div><div class="lbl">🪙 Total Poin</div></div>
+        <div class="sbox"><div class="val" id="rw-botol">—</div><div class="lbl">Total Botol</div></div>
+        <div class="sbox"><div class="val" id="rw-poin">—</div><div class="lbl">Total Poin</div></div>
       </div>
       <div class="filters">
         <button class="fb a" onclick="rwSetFilter('all',this)">Semua</button>
@@ -363,7 +434,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="shell">
     <div class="top">
       <div class="top-row">
-        <div class="top-back-row"><button class="back" onclick="showPage('home')">←</button><h1>Profil Saya</h1></div>
+        <div class="top-back-row"><button class="back" onclick="showPage('home')">←</button><h1>PROFIL SAYA</h1></div>
         <button class="edit-btn" id="pf-btn-edit" onclick="pfToggleEdit()">✏️ Edit</button>
       </div>
     </div>
@@ -377,9 +448,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="ava-since" id="pf-since">—</div>
       </div>
       <div class="sgrid">
-        <div class="sbox"><div class="val" id="pf-poin">—</div><div class="lbl">🪙 Poin</div></div>
-        <div class="sbox"><div class="val" id="pf-botol">—</div><div class="lbl">🍶 Botol</div></div>
-        <div class="sbox"><div class="val" id="pf-kg">—</div><div class="lbl">📦 Est. Kg</div></div>
+        <div class="sbox"><div class="val" id="pf-poin">—</div><div class="lbl">Poin</div></div>
+        <div class="sbox"><div class="val" id="pf-botol">—</div><div class="lbl">Botol</div></div>
+        <div class="sbox"><div class="val" id="pf-kg">—</div><div class="lbl">Est. Kg</div></div>
       </div>
       <div class="card" id="pf-view-card" style="padding:0 15px;margin-bottom:16px">
         <div class="irow"><div class="iico">🆔</div><div><div class="ikey">User ID</div><div class="ival" id="pf-uid">—</div></div></div>
@@ -623,22 +694,22 @@ async function rdLoadMyVouchers() {
   area.innerHTML = res.vouchers.map(function(v) {
     var isActive = v.status === 'aktif';
     var badge = isActive
-      ? '<span style="background:#e1f5ee;color:#0F6E56;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ AKTIF</span>'
-      : '<span style="background:#f0f0f0;color:#888;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✖ HANGUS</span>';
+      ? '<span style="background:var(--leaf-l);color:var(--leaf-d);padding:3px 10px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Aktif</span>'
+      : '<span style="background:var(--line-2);color:var(--mute);padding:3px 10px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Hangus</span>';
     var subInfo = isActive ? 'Terbit ' + fmtDate(v.tgl_terbit)
                            : 'Dipakai ' + fmtDate(v.tgl_dipakai) + ' — ' + (v.merchant || '-');
-    return '<div class="card" onclick="rdShowQR(\''+v.kode+'\',\''+v.status+'\')" style="cursor:pointer;margin-bottom:9px;' + (isActive ? '' : 'opacity:.65') + '">'
+    return '<div class="card" onclick="rdShowQR(\''+v.kode+'\',\''+v.status+'\')" style="cursor:pointer;margin-bottom:8px;padding:14px;' + (isActive ? '' : 'opacity:.55') + '">'
       + '<div style="display:flex;align-items:center;gap:12px">'
-      +   '<div style="font-size:32px">🎟️</div>'
+      +   '<div style="font-size:26px">🎟️</div>'
       +   '<div style="flex:1;min-width:0">'
-      +     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'
-      +       '<div style="font-size:15px;font-weight:800;color:#1D9E75">Rp ' + Number(v.nilai_rupiah).toLocaleString('id-ID') + '</div>'
+      +     '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +       '<div style="font-size:15px;font-weight:800;color:var(--ink)">Rp ' + Number(v.nilai_rupiah).toLocaleString('id-ID') + '</div>'
       +       badge
       +     '</div>'
-      +     '<div style="font-size:12px;color:#888;font-family:\'Courier New\',monospace">' + v.kode + '</div>'
-      +     '<div style="font-size:11px;color:#aaa;margin-top:2px">' + subInfo + '</div>'
+      +     '<div style="font-size:11.5px;color:var(--mute);font-family:\'SF Mono\',\'Courier New\',monospace;letter-spacing:.05em">' + v.kode + '</div>'
+      +     '<div style="font-size:10.5px;color:var(--mute-2);margin-top:3px">' + subInfo + '</div>'
       +   '</div>'
-      +   '<div style="color:#ccc;font-size:20px">›</div>'
+      +   '<div style="color:var(--mute-2);font-size:18px">›</div>'
       + '</div></div>';
   }).join('');
 }
@@ -665,17 +736,17 @@ function rdShowQR(kode, status) {
   var canvas = document.getElementById('rd-qr-canvas');
   canvas.innerHTML = '';
   new QRCode(canvas, { text: kode, width: 200, height: 200,
-    colorDark: '#0F6E56', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    colorDark: '#0A0A0A', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
 
   var statusEl = document.getElementById('rd-qr-status');
   if (status === 'aktif') {
-    statusEl.style.background = '#e1f5ee';
-    statusEl.style.color = '#0F6E56';
-    statusEl.textContent = '✅ Voucher aktif — bisa dipakai di merchant';
+    statusEl.style.background = 'var(--leaf-l)';
+    statusEl.style.color = 'var(--leaf-d)';
+    statusEl.textContent = '✓ Voucher Aktif';
   } else {
-    statusEl.style.background = '#fdecec';
-    statusEl.style.color = '#c62828';
-    statusEl.textContent = '✖ Voucher sudah dipakai';
+    statusEl.style.background = 'var(--danger-bg)';
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = '✕ Voucher Sudah Dipakai';
   }
   document.getElementById('rd-qr-overlay').className = 'overlay open';
 }
